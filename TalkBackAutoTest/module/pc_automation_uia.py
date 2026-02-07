@@ -1,18 +1,22 @@
 import sys
 import time
 
-import uiautomation as auto
-from uiautomation import ControlType, PatternId, PropertyId
+try:
+    import uiautomation as auto
+    from uiautomation import PatternId, PropertyId
+except ImportError:
+    auto = None
+    PatternId = None
+    PropertyId = None
 
 from pc_automation_clipboard import copy_narrator_last_spoken
 from pc_automation_core import build_element_info
 
 
-# Narrator timing (seconds)
 NARRATOR_FOCUS_DELAY = 0.35
+UIA_MISSING_MESSAGE = "ERROR: uiautomation library not available"
 
 
-# --- Constants: Enum to String Mappings ---
 TOGGLE_STATE_NAMES = {
     0: "Off",
     1: "On",
@@ -23,8 +27,6 @@ EXPAND_COLLAPSE_STATE_NAMES = {
     1: "Expanded",
 }
 
-
-# --- Pattern Handler Functions  ---
 
 def _extract_value_pattern(element):
     """Extract Value from ValuePattern. Returns string or None."""
@@ -75,7 +77,6 @@ def _extract_position_in_set(element):
     return None
 
 
-# --- Control Type to Pattern Mapping ---
 CONTROL_PATTERNS = {
     50004: ["Value"],                          # EditControl
     50030: ["Value"],                          # DocumentControl
@@ -87,7 +88,6 @@ CONTROL_PATTERNS = {
     50024: ["ExpandCollapseState"],            # TreeItemControl
 }
 
-# Map pattern names to handler functions
 PATTERN_HANDLERS = {
     "Value": _extract_value_pattern,
     "ToggleState": _extract_toggle_pattern,
@@ -96,15 +96,24 @@ PATTERN_HANDLERS = {
 }
 
 
+def ensure_available():
+    if auto is None:
+        print(UIA_MISSING_MESSAGE, file=sys.stderr)
+        return False
+    return True
+
+
 def get_focused_control():
+    if auto is None:
+        return None
     return auto.GetFocusedControl()
 
 
 def get_runtime_id(element):
+    if element is None:
+        return None
     return element.GetRuntimeId()
 
-
-# --- Main Function ---
 
 _NARRATOR_TEXT_MISSING = object()
 
@@ -120,8 +129,7 @@ def get_focused_element_info(narrator_text=_NARRATOR_TEXT_MISSING):
         narrator_text: Optional override; pass None to skip capture.
         None: If no element focused
     """
-    if auto is None:
-        print("ERROR: uiautomation library not available", file=sys.stderr)
+    if not ensure_available():
         return None
 
     time.sleep(NARRATOR_FOCUS_DELAY)

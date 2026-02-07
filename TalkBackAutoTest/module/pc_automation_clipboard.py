@@ -4,8 +4,16 @@ import os
 import subprocess
 import sys
 import time
-import psutil
-import win32clipboard
+
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
+try:
+    import win32clipboard
+except ImportError:
+    win32clipboard = None
 
 
 from pc_automation_keys import (
@@ -17,12 +25,10 @@ from pc_automation_keys import (
 )
 
 
-# Clipboard constants
 CF_UNICODETEXT = 13
 GMEM_MOVEABLE = 0x0002
 SPI_GETSCREENREADER = 0x0046
 
-# Narrator timing (seconds)
 NARRATOR_CLIPBOARD_DELAY = 0.2
 NARRATOR_TOGGLE_DELAY = 0.4
 NARRATOR_TOGGLE_RETRIES = 4
@@ -59,7 +65,7 @@ def is_narrator_running():
             if name == "narrator.exe":
                 return True
         return False
-    print("Error: psutil unavailable. Please install lib", file=sys.stderr)
+    print("WARNING: psutil unavailable; falling back to SPI", file=sys.stderr)
 
     enabled = wintypes.BOOL()
     ok = _user32.SystemParametersInfoW(SPI_GETSCREENREADER, 0, ctypes.byref(enabled), 0)
@@ -145,6 +151,8 @@ def preflight_clipboard_text_format():
 
 def clear_clipboard_history_best_effort():
     """Clear current clipboard contents without affecting pinned history."""
+    if win32clipboard is None:
+        return False
     delay = CLIPBOARD_CLEAR_DELAY
     for _ in range(CLIPBOARD_CLEAR_RETRIES):
         try:
@@ -162,7 +170,7 @@ def clear_clipboard_history_best_effort():
             time.sleep(delay)
             delay *= 2
 
-    print("WARNING: Failed to clear clipboard after retries", file=sys.stderr)
+    print("Failed to clear clipboard after retries", file=sys.stderr)
     return False
 
 

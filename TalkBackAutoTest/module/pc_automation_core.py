@@ -1,7 +1,14 @@
 """Core JSON assembly helpers (pure functions)."""
 
 
-def build_element_info(name, localized_control_type, position, pattern_order, pattern_values, narrator_text):
+def build_element_info(
+    name,
+    localized_control_type,
+    position,
+    pattern_order,
+    pattern_values,
+    narrator_text,
+):
     result = {
         "Name": name or "",
         "LocalizedControlType": localized_control_type or "",
