@@ -48,11 +48,25 @@ The system SHALL attempt Narrator clipboard capture using Caps Lock + Ctrl + X o
 - **THEN** the system sends the Caps Lock + Ctrl + X chord once and does not send rehear or Insert-based chords
 
 #### Requirement: Failure returns None and restores clipboard
-The system SHALL return None when capture fails to replace the clipboard sentinel and SHALL attempt to restore the original clipboard text.
+The system SHALL return None when the clipboard sequence number does not change after the capture hotkey is sent within a short timeout, and SHALL attempt to restore the original clipboard text.
 
-##### Scenario: Clipboard does not update
-- **WHEN** the clipboard text remains the sentinel after the capture attempt
+##### Scenario: Clipboard sequence does not change
+- **WHEN** the Narrator capture hotkey is sent and the clipboard sequence number does not change within the timeout
 - **THEN** the system returns None and restores the original clipboard contents
+
+#### Requirement: Detect clipboard update via sequence number
+The system SHALL read the clipboard sequence number before sending the Narrator capture hotkey and SHALL wait for it to change before reading clipboard text.
+
+##### Scenario: Capture attempt starts
+- **WHEN** a Narrator capture attempt begins
+- **THEN** the system waits for the clipboard sequence number to change before reading clipboard text
+
+#### Requirement: Do not write sentinel text during capture
+The system SHALL NOT write a sentinel string to the clipboard as part of Narrator capture detection.
+
+##### Scenario: Capture in progress
+- **WHEN** Narrator capture is performed
+- **THEN** the system does not write a sentinel string to the clipboard
 
 ### Capability: PC automation modularization
 
@@ -252,11 +266,15 @@ The system SHALL omit `NarratorText` and log an error to stderr if capture fails
 ### Capability: Clipboard clear
 
 #### Requirement: Clear non-pinned clipboard history after comparison
-The system SHALL clear non-pinned clipboard history entries after comparing focused element attributes with NarratorText.
+The system SHALL clear the current clipboard contents after each Narrator capture attempt in the CLI tab loop, after element-vs-NarratorText comparison when available, and SHALL perform the clear even if capture fails.
 
-##### Scenario: Comparison complete
-- **WHEN** element attributes have been compared with NarratorText
-- **THEN** the system clears non-pinned clipboard history entries
+##### Scenario: Capture attempt complete
+- **WHEN** a tab iteration completes its Narrator capture attempt and comparison (if any)
+- **THEN** the system clears the current clipboard contents
+
+##### Scenario: Capture fails
+- **WHEN** a tab iteration fails to capture NarratorText
+- **THEN** the system still performs the clipboard clear step
 
 #### Requirement: Preserve pinned clipboard items
 The system SHALL preserve pinned clipboard history items when clearing clipboard history.
@@ -264,6 +282,20 @@ The system SHALL preserve pinned clipboard history items when clearing clipboard
 ##### Scenario: Pinned entries exist
 - **WHEN** non-pinned clipboard history is cleared
 - **THEN** pinned items remain available in clipboard history
+
+#### Requirement: Fallback clear without pywin32
+The system SHALL set a safe sentinel text when win32clipboard is unavailable to ensure the clipboard is clean for the next iteration.
+
+##### Scenario: pywin32 missing
+- **WHEN** the clipboard clear helper is invoked and win32clipboard is not available
+- **THEN** the system writes a safe sentinel text to the clipboard
+
+#### Requirement: Scope clipboard clear to tab loop
+The system SHALL perform clipboard clearing only during the CLI tab loop and SHALL NOT clear clipboard contents for other CLI actions.
+
+##### Scenario: Non-tab command
+- **WHEN** `get_focused` or `narrator` is executed
+- **THEN** the system does not invoke the clipboard clear step
 
 #### Requirement: Log clear failures without stopping tab
 The system SHALL log clear failures to stderr and continue the tab sequence.
@@ -275,11 +307,15 @@ The system SHALL log clear failures to stderr and continue the tab sequence.
 ### Capability: Clipboard clear
 
 #### Requirement: Clear non-pinned clipboard history after comparison
-The system SHALL clear non-pinned clipboard history entries after comparing focused element attributes with NarratorText.
+The system SHALL clear the current clipboard contents after each Narrator capture attempt in the CLI tab loop, after element-vs-NarratorText comparison when available, and SHALL perform the clear even if capture fails.
 
-##### Scenario: Comparison complete
-- **WHEN** element attributes have been compared with NarratorText
-- **THEN** the system clears non-pinned clipboard history entries
+##### Scenario: Capture attempt complete
+- **WHEN** a tab iteration completes its Narrator capture attempt and comparison (if any)
+- **THEN** the system clears the current clipboard contents
+
+##### Scenario: Capture fails
+- **WHEN** a tab iteration fails to capture NarratorText
+- **THEN** the system still performs the clipboard clear step
 
 #### Requirement: Preserve pinned clipboard items
 The system SHALL preserve pinned clipboard history items when clearing clipboard history.
@@ -287,6 +323,20 @@ The system SHALL preserve pinned clipboard history items when clearing clipboard
 ##### Scenario: Pinned entries exist
 - **WHEN** non-pinned clipboard history is cleared
 - **THEN** pinned items remain available in clipboard history
+
+#### Requirement: Fallback clear without pywin32
+The system SHALL set a safe sentinel text when win32clipboard is unavailable to ensure the clipboard is clean for the next iteration.
+
+##### Scenario: pywin32 missing
+- **WHEN** the clipboard clear helper is invoked and win32clipboard is not available
+- **THEN** the system writes a safe sentinel text to the clipboard
+
+#### Requirement: Scope clipboard clear to tab loop
+The system SHALL perform clipboard clearing only during the CLI tab loop and SHALL NOT clear clipboard contents for other CLI actions.
+
+##### Scenario: Non-tab command
+- **WHEN** `get_focused` or `narrator` is executed
+- **THEN** the system does not invoke the clipboard clear step
 
 #### Requirement: Log clear failures without stopping tab
 The system SHALL log clear failures to stderr and continue the tab sequence.

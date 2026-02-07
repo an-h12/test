@@ -62,7 +62,9 @@ def _maybe_capture_for_element(element_info, narrator_ready):
 
     mismatch_labels = _mismatch_labels(element_info, final_text)
     if final_text:
-        clipboard.clear_clipboard_history_best_effort()
+        cleared = clipboard.clear_clipboard_history()
+        if not cleared:
+            print("WARNING: Clipboard history clear failed", file=sys.stderr)
     else:
         print("ERROR: Narrator speech capture failed", file=sys.stderr)
     return final_text, mismatch_labels

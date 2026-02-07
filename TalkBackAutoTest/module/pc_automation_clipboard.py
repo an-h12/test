@@ -6,14 +6,14 @@ import sys
 import time
 
 try:
-    import psutil
+    import psutil # type: ignore
 except ImportError:
     psutil = None
 
 try:
-    import win32clipboard
+    from winrt.windows.applicationmodel.datatransfer import Clipboard as WinrtClipboard # type: ignore
 except ImportError:
-    win32clipboard = None
+    WinrtClipboard = None
 
 
 from pc_automation_keys import (
@@ -32,8 +32,8 @@ SPI_GETSCREENREADER = 0x0046
 NARRATOR_CLIPBOARD_DELAY = 0.2
 NARRATOR_TOGGLE_DELAY = 0.4
 NARRATOR_TOGGLE_RETRIES = 4
-CLIPBOARD_CLEAR_RETRIES = 3
-CLIPBOARD_CLEAR_DELAY = 0.05
+CLIPBOARD_SEQUENCE_TIMEOUT = 0.5
+CLIPBOARD_SEQUENCE_POLL_DELAY = 0.01
 
 _user32 = ctypes.windll.user32
 _kernel32 = ctypes.windll.kernel32
@@ -42,6 +42,8 @@ _user32.GetClipboardData.restype = wintypes.HANDLE
 _user32.GetClipboardData.argtypes = [wintypes.UINT]
 _user32.SetClipboardData.restype = wintypes.HANDLE
 _user32.SetClipboardData.argtypes = [wintypes.UINT, wintypes.HANDLE]
+_user32.GetClipboardSequenceNumber.restype = wintypes.DWORD
+_user32.GetClipboardSequenceNumber.argtypes = []
 _user32.SystemParametersInfoW.restype = wintypes.BOOL
 _user32.SystemParametersInfoW.argtypes = [
     wintypes.UINT,
@@ -149,29 +151,23 @@ def preflight_clipboard_text_format():
     return True
 
 
-def clear_clipboard_history_best_effort():
-    """Clear current clipboard contents without affecting pinned history."""
-    if win32clipboard is None:
+def clear_clipboard_history():
+    """Clear clipboard history (Win+V) without affecting pinned items."""
+    if WinrtClipboard is None:
+        print(
+            "WARNING: winrt unavailable; clipboard history not cleared",
+            file=sys.stderr,
+        )
         return False
-    delay = CLIPBOARD_CLEAR_DELAY
-    for _ in range(CLIPBOARD_CLEAR_RETRIES):
-        try:
-            win32clipboard.OpenClipboard()
-            try:
-                win32clipboard.EmptyClipboard()
-            finally:
-                win32clipboard.CloseClipboard()
-            return True
-        except Exception:
-            try:
-                win32clipboard.CloseClipboard()
-            except Exception:
-                pass
-            time.sleep(delay)
-            delay *= 2
-
-    print("Failed to clear clipboard after retries", file=sys.stderr)
-    return False
+    try:
+        result = WinrtClipboard.clear_history()
+    except Exception:
+        print("WARNING: Failed to clear clipboard history", file=sys.stderr)
+        return False
+    if result is False:
+        print("WARNING: Clipboard history clear returned False", file=sys.stderr)
+        return False
+    return True
 
 
 def _open_clipboard(retries=10, delay=0.01):
@@ -179,6 +175,24 @@ def _open_clipboard(retries=10, delay=0.01):
         if _user32.OpenClipboard(None):
             return True
         time.sleep(delay)
+    return False
+
+
+def _get_clipboard_sequence_number():
+    try:
+        return _user32.GetClipboardSequenceNumber()
+    except Exception:
+        return None
+
+
+def _wait_for_clipboard_sequence_change(seq_before):
+    if seq_before is None:
+        return False
+    deadline = time.time() + CLIPBOARD_SEQUENCE_TIMEOUT
+    while time.time() < deadline:
+        if _user32.GetClipboardSequenceNumber() != seq_before:
+            return True
+        time.sleep(CLIPBOARD_SEQUENCE_POLL_DELAY)
     return False
 
 
@@ -255,18 +269,13 @@ def capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
         return None
     had_text_format = has_text
 
-    sentinel = f"__NARRATOR_CAPTURE_{int(time.time() * 1000)}__"
-    if not set_clipboard_text(sentinel):
-        print("ERROR: Failed to set clipboard sentinel", file=sys.stderr)
-        return None
-
     def _capture_with_key(narrator_vk):
+        seq_before = _get_clipboard_sequence_number()
         send_key_chord([narrator_vk, VK_CONTROL, VK_X])
-        time.sleep(NARRATOR_CLIPBOARD_DELAY)
+        if not _wait_for_clipboard_sequence_change(seq_before):
+            return None
         ok_new, new_text, has_text_new = get_clipboard_text()
         if not ok_new or not has_text_new:
-            return None
-        if new_text == sentinel:
             return None
         new_text = _strip_narrator_confirmation(new_text)
         if not new_text:
@@ -276,6 +285,9 @@ def capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
     text = None
     try:
         text = _capture_with_key(VK_CAPITAL)
+        if text is None:
+            time.sleep(NARRATOR_CLIPBOARD_DELAY)
+            text = _capture_with_key(VK_CAPITAL)
     finally:
         if had_text_format and original_text is not None:
             if not set_clipboard_text(original_text):

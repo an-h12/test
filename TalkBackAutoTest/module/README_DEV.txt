@@ -18,10 +18,10 @@ YÊU CẦU HỆ THỐNG
 - Python 3.x đã cài đặt và thêm vào PATH
 - Thư viện uiautomation (cho chức năng lấy thông tin element):
     pip install uiautomation
-- Thư viện psutil (để kiểm tra Narrator.exe, khuyến nghị):
+- Thư viện psutil (để kiểm tra Narrator.exe):
     pip install psutil
-- Thư viện pywin32 (để clear clipboard, khuyến nghị):
-    pip install pywin32
+- Thư viện winrt (để clear clipboard history Win+V):
+    pip install winrt-runtime winrt-Windows.ApplicationModel.DataTransfer
 
 
 CÁCH SỬ DỤNG DÒNG LỆNH
@@ -126,7 +126,9 @@ CÁCH SỬ DỤNG DÒNG LỆNH
     Note: If clipboard text format is unavailable, capture still proceeds and may overwrite clipboard contents.
     Note: When NarratorText does not match Name/ControlType, stderr logs `Mismatch: Name` and/or `Mismatch: ControlType` but NarratorText is still included.
     Note: Captured NarratorText is logged to stderr for comparison.
-    Note: After comparison, the clipboard is cleared (non-pinned only) if win32clipboard is available.
+    Note: Capture detection uses clipboard sequence number; no sentinel text is written.
+    Note: After each successful capture, clipboard history (Win+V) is cleared (pinned preserved) when winrt is available.
+    Note: Clipboard history clear is skipped when capture fails.
     Manual check: `python pc_automation.py tab` should emit output after the first Tab, print the repeated element before stopping, and log mismatch warnings if capture lags.
      
      Tính năng Cycle Detection:
@@ -277,8 +279,8 @@ GIẢI PHÁP: Kiểm tra xem Narrator có bị vô hiệu hóa trong cài đặt
 VẤN ĐỀ: "WARNING: psutil unavailable; falling back to SPI"
 GIẢI PHÁP: Có thể bỏ qua (fallback vẫn hoạt động), hoặc cài psutil để kiểm tra chính xác Narrator.exe.
 
-VẤN ĐỀ: Clipboard không được clear sau khi capture
-GIẢI PHÁP: Cài pywin32 (win32clipboard) nếu muốn tự động clear clipboard.
+VẤN ĐỀ: Clipboard history (Win+V) không được clear sau khi capture
+GIẢI PHÁP: Cài winrt và chạy CLI bằng Python 3.12; nếu thiếu winrt sẽ chỉ cảnh báo.
 
 VẤN ĐỀ: Phím Tab không hoạt động trong một số ứng dụng
 GIẢI PHÁP: Một số ứng dụng có thể bỏ qua SendInput vì lý do bảo mật.
