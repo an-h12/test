@@ -110,7 +110,7 @@ def _ensure_narrator_on():
         return True
     if _start_narrator_process() and _wait_for_narrator_state(True):
         return True
-    print("ERROR: Auto-toggle Narrator failed; capture skipped", file=sys.stderr)
+    print("ERROR: Auto-toggle Narrator failed", file=sys.stderr)
     return None
 
 

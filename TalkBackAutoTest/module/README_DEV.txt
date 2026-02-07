@@ -18,8 +18,10 @@ YÊU CẦU HỆ THỐNG
 - Python 3.x đã cài đặt và thêm vào PATH
 - Thư viện uiautomation (cho chức năng lấy thông tin element):
     pip install uiautomation
-- Thư viện psutil (để kiểm tra Narrator.exe):
+- Thư viện psutil (để kiểm tra Narrator.exe, khuyến nghị):
     pip install psutil
+- Thư viện pywin32 (để clear clipboard, khuyến nghị):
+    pip install pywin32
 
 
 CÁCH SỬ DỤNG DÒNG LỆNH
@@ -271,6 +273,12 @@ GIẢI PHÁP: Thêm Python vào biến môi trường PATH của Windows
 VẤN ĐỀ: Script chạy nhưng Narrator không bật/tắt
 GIẢI PHÁP: Kiểm tra xem Narrator có bị vô hiệu hóa trong cài đặt Windows không
            (Settings > Accessibility > Narrator)
+
+VẤN ĐỀ: "WARNING: psutil unavailable; falling back to SPI"
+GIẢI PHÁP: Có thể bỏ qua (fallback vẫn hoạt động), hoặc cài psutil để kiểm tra chính xác Narrator.exe.
+
+VẤN ĐỀ: Clipboard không được clear sau khi capture
+GIẢI PHÁP: Cài pywin32 (win32clipboard) nếu muốn tự động clear clipboard.
 
 VẤN ĐỀ: Phím Tab không hoạt động trong một số ứng dụng
 GIẢI PHÁP: Một số ứng dụng có thể bỏ qua SendInput vì lý do bảo mật.
