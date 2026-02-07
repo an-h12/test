@@ -121,10 +121,10 @@ CÁCH SỬ DỤNG DÒNG LỆNH
     Note: The initial focused element is not printed; output starts after the first Tab.
     Note: The tab command will auto-toggle Narrator for capture when needed.
     Note: When a RuntimeId repeats, the repeated element is printed once, then the loop stops.
-    Note: If clipboard text format is unavailable, traversal continues with NarratorText = null.
-    Note: When NarratorText does not match Name/ControlType, stderr logs `Mismatch: Name` and/or `Mismatch: ControlType` and NarratorText is omitted.
+    Note: If clipboard text format is unavailable, capture still proceeds and may overwrite clipboard contents.
+    Note: When NarratorText does not match Name/ControlType, stderr logs `Mismatch: Name` and/or `Mismatch: ControlType` but NarratorText is still included.
     Note: Captured NarratorText is logged to stderr for comparison.
-    Note: Captured NarratorText is logged to stderr for comparison.
+    Note: After comparison, the clipboard is cleared (non-pinned only) if win32clipboard is available.
     Manual check: `python pc_automation.py tab` should emit output after the first Tab, print the repeated element before stopping, and log mismatch warnings if capture lags.
      
      Tính năng Cycle Detection:

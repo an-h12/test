@@ -24,8 +24,7 @@ def run_tab_sequence():
 
     auto_enabled = clipboard.prepare_narrator_capture_session()
     try:
-        clipboard_ok = clipboard.preflight_clipboard_text_format()
-        narrator_ready = auto_enabled is not None and clipboard_ok
+        narrator_ready = auto_enabled is not None
 
         def _narrator_text_matches(element_info, narrator_text):
             if not element_info or not narrator_text:
@@ -39,47 +38,45 @@ def run_tab_sequence():
             missing_type = bool(control_type) and control_type not in text
             return not (missing_name or missing_type)
 
-        def _log_mismatch(element_info, narrator_text):
+        def _mismatch_labels(element_info, narrator_text):
             if not element_info or not narrator_text:
-                return
+                return []
             text = narrator_text.lower()
             name = (element_info.get("Name") or "").strip().lower()
             control_type = (
                 (element_info.get("LocalizedControlType") or "").strip().lower()
             )
+            labels = []
             if name and name not in text:
-                print("Mismatch: Name", file=sys.stderr)
+                labels.append("Name")
             if control_type and control_type not in text:
-                print("Mismatch: ControlType", file=sys.stderr)
-
-        def _log_narrator_text(element_info, narrator_text):
-            if not narrator_text:
-                return
-            name = (element_info.get("Name") or "").strip()
-            control_type = (element_info.get("LocalizedControlType") or "").strip()
-            if name or control_type:
-                print(
-                    f"NarratorText: {narrator_text} (Name={name}, ControlType={control_type})",
-                    file=sys.stderr,
-                )
-            else:
-                print(f"NarratorText: {narrator_text}", file=sys.stdout)
+                labels.append("ControlType")
+            return labels
 
         def _maybe_capture_for_element(element_info):
             if not narrator_ready:
-                return None
+                return None, []
             time.sleep(NARRATOR_CAPTURE_RETRY_DELAY)
-            narrator_text = clipboard.try_capture_narrator_last_spoken()
-            _log_narrator_text(element_info, narrator_text)
-            if narrator_text and _narrator_text_matches(element_info, narrator_text):
-                return narrator_text
-            time.sleep(NARRATOR_CAPTURE_RETRY_DELAY)
-            narrator_text = clipboard.try_capture_narrator_last_spoken()
-            _log_narrator_text(element_info, narrator_text)
-            if narrator_text and _narrator_text_matches(element_info, narrator_text):
-                return narrator_text
-            _log_mismatch(element_info, narrator_text)
-            return None
+            first_text = clipboard.try_capture_narrator_last_spoken(
+                allow_no_text_format=True,
+                log_failure=False,
+            )
+            if first_text and _narrator_text_matches(element_info, first_text):
+                final_text = first_text
+            else:
+                time.sleep(NARRATOR_CAPTURE_RETRY_DELAY)
+                second_text = clipboard.try_capture_narrator_last_spoken(
+                    allow_no_text_format=True,
+                    log_failure=False,
+                )
+                final_text = second_text or first_text
+
+            mismatch_labels = _mismatch_labels(element_info, final_text)
+            if final_text:
+                clipboard.clear_clipboard_history_best_effort()
+            else:
+                print("ERROR: Narrator speech capture failed", file=sys.stderr)
+            return final_text, mismatch_labels
 
         element = uia.get_focused_control()
         runtime_id = uia.get_runtime_id(element) if element is not None else None
@@ -100,15 +97,18 @@ def run_tab_sequence():
             runtime_id = uia.get_runtime_id(element) if element is not None else None
 
             element_info = uia.get_focused_element_info(narrator_text=None)
-            narrator_text = _maybe_capture_for_element(element_info)
-            if element_info and narrator_text is not None:
-                element_info["NarratorText"] = narrator_text
+            narrator_text, mismatch_labels = _maybe_capture_for_element(element_info)
+            if narrator_text and mismatch_labels:
+                narrator_text = (
+                    f"{narrator_text}[Mismatch: {', '.join(mismatch_labels)}]"
+                )
+            output_payload = {
+                "NarratorText": narrator_text,
+                "Element": element_info,
+            }
 
             if runtime_id is not None and runtime_id in seen_runtime_ids:
-                if element_info:
-                    print(json.dumps(element_info, ensure_ascii=False))
-                else:
-                    print(json.dumps(None))
+                print(json.dumps(output_payload, ensure_ascii=False))
                 print(
                     f"Total unique elements: {len(seen_runtime_ids)}",
                     file=sys.stderr,
@@ -118,10 +118,7 @@ def run_tab_sequence():
             if runtime_id is not None:
                 seen_runtime_ids.add(runtime_id)
 
-            if element_info:
-                print(json.dumps(element_info, ensure_ascii=False))
-            else:
-                print(json.dumps(None))
+            print(json.dumps(output_payload, ensure_ascii=False))
     finally:
         clipboard.restore_narrator_capture_session(auto_enabled)
 

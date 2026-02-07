@@ -5,6 +5,7 @@ import subprocess
 import sys
 import time
 import psutil
+import win32clipboard
 
 
 from pc_automation_keys import (
@@ -25,6 +26,8 @@ SPI_GETSCREENREADER = 0x0046
 NARRATOR_CLIPBOARD_DELAY = 0.2
 NARRATOR_TOGGLE_DELAY = 0.4
 NARRATOR_TOGGLE_RETRIES = 4
+CLIPBOARD_CLEAR_RETRIES = 3
+CLIPBOARD_CLEAR_DELAY = 0.05
 
 _user32 = ctypes.windll.user32
 _kernel32 = ctypes.windll.kernel32
@@ -140,6 +143,29 @@ def preflight_clipboard_text_format():
     return True
 
 
+def clear_clipboard_history_best_effort():
+    """Clear current clipboard contents without affecting pinned history."""
+    delay = CLIPBOARD_CLEAR_DELAY
+    for _ in range(CLIPBOARD_CLEAR_RETRIES):
+        try:
+            win32clipboard.OpenClipboard()
+            try:
+                win32clipboard.EmptyClipboard()
+            finally:
+                win32clipboard.CloseClipboard()
+            return True
+        except Exception:
+            try:
+                win32clipboard.CloseClipboard()
+            except Exception:
+                pass
+            time.sleep(delay)
+            delay *= 2
+
+    print("WARNING: Failed to clear clipboard after retries", file=sys.stderr)
+    return False
+
+
 def _open_clipboard(retries=10, delay=0.01):
     for _ in range(retries):
         if _user32.OpenClipboard(None):
@@ -202,22 +228,24 @@ def set_clipboard_text(text):
         _user32.CloseClipboard()
 
 
-def capture_narrator_last_spoken():
+def capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
     """
     Trigger Narrator's copy last spoken hotkey and return captured text.
-    Requires Narrator to be running and clipboard text format available.
+    Requires Narrator to be running. When allow_no_text_format is False,
+    clipboard text format must be available.
     Returns None on failure (logs to stderr).
     """
     ok, original_text, has_text = get_clipboard_text()
     if not ok:
         print("ERROR: Clipboard unavailable for Narrator capture", file=sys.stderr)
         return None
-    if not has_text:
+    if not has_text and not allow_no_text_format:
         print(
             "ERROR: Clipboard has no text format; capture skipped to preserve data",
             file=sys.stderr,
         )
         return None
+    had_text_format = has_text
 
     sentinel = f"__NARRATOR_CAPTURE_{int(time.time() * 1000)}__"
     if not set_clipboard_text(sentinel):
@@ -241,10 +269,11 @@ def capture_narrator_last_spoken():
     try:
         text = _capture_with_key(VK_CAPITAL)
     finally:
-        if not set_clipboard_text(original_text):
-            print("Failed to restore clipboard text", file=sys.stderr)
+        if had_text_format and original_text is not None:
+            if not set_clipboard_text(original_text):
+                print("Failed to restore clipboard text", file=sys.stderr)
 
-    if text is None:
+    if text is None and log_failure:
         print("ERROR: Narrator speech capture failed", file=sys.stderr)
     return text
 
@@ -278,13 +307,17 @@ def copy_narrator_last_spoken():
         restore_narrator_capture_session(auto_enabled)
 
 
-def try_capture_narrator_last_spoken():
+def try_capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
     """
     Capture Narrator text only if Narrator is already running.
     Returns None if Narrator is off or capture fails.
     """
     if not is_narrator_running():
         return None
-    if not preflight_clipboard_text_format():
-        return None
-    return capture_narrator_last_spoken()
+    if not allow_no_text_format:
+        if not preflight_clipboard_text_format():
+            return None
+    return capture_narrator_last_spoken(
+        allow_no_text_format=allow_no_text_format,
+        log_failure=log_failure,
+    )
