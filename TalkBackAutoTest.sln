@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TalkBackAutoTest", "TalkBackAutoTest\TalkBackAutoTest.csproj", "{FA4D9DA6-1F5A-457D-99E0-D61B15CE8B62}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FA4D9DA6-1F5A-457D-99E0-D61B15CE8B62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA4D9DA6-1F5A-457D-99E0-D61B15CE8B62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA4D9DA6-1F5A-457D-99E0-D61B15CE8B62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA4D9DA6-1F5A-457D-99E0-D61B15CE8B62}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

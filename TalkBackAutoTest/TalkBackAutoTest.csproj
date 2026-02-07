@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FA4D9DA6-1F5A-457D-99E0-D61B15CE8B62}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TalkBackAutoTest</RootNamespace>
+    <AssemblyName>TalkBackAutoTest</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>voice.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BetterFolderBrowser">
+      <HintPath>..\..\SSM_GenerateInputData\SSM_GenerateInputData\bin\Debug\BetterFolderBrowser.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack">
+      <HintPath>..\..\..\..\F_Folder\2019\PROJECT_GIT\DAT\PC_AUTOMATION\bin\Debug\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell">
+      <HintPath>..\..\..\..\F_Folder\2019\PROJECT_GIT\DAT\PC_AUTOMATION\bin\Debug\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\..\F_Folder\2019\PROJECT_GIT\LeakActivity\Leak Activity\bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI">
+      <HintPath>C:\Users\tuan.pht\Documents\Visual Studio 2012\Projects\PerformanceQualiTyTool\PerformanceQualiTyTool\bin\Debug\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>C:\SCS\AutoPenUpHealth\AutoPenUpHealth\bin\Debug\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats">
+      <HintPath>C:\SCS\AutoPenUpHealth\AutoPenUpHealth\bin\Debug\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ActivityForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ActivityForm.Designer.cs">
+      <DependentUpon>ActivityForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AppName.cs" />
+    <Compile Include="ChooseSerialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChooseSerialForm.Designer.cs">
+      <DependentUpon>ChooseSerialForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConfirmPopUp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfirmPopUp.Designer.cs">
+      <DependentUpon>ConfirmPopUp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AObject.cs" />
+    <Compile Include="DeviceInfo.cs" />
+    <Compile Include="GuideForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GuideForm.Designer.cs">
+      <DependentUpon>GuideForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TBHelper.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MemorySteam.cs" />
+    <Compile Include="MScreenRecordingClass.cs" />
+    <Compile Include="MySerializer.cs" />
+    <Compile Include="Object.cs" />
+    <Compile Include="PLMForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PLMForm.Designer.cs">
+      <DependentUpon>PLMForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UsbNotification.cs" />
+    <EmbeddedResource Include="ActivityForm.resx">
+      <DependentUpon>ActivityForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChooseSerialForm.resx">
+      <DependentUpon>ChooseSerialForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConfirmPopUp.resx">
+      <DependentUpon>ConfirmPopUp.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GuideForm.resx">
+      <DependentUpon>GuideForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PLMForm.resx">
+      <DependentUpon>PLMForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="app.manifest">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug\talbackIcon.PNG" />
+    <None Include="Resources\down.JPG" />
+    <None Include="Resources\left.JPG" />
+    <None Include="Resources\right.png" />
+    <None Include="Resources\up.png" />
+    <None Include="Resources\device_connect.JPG" />
+    <None Include="Resources\rf.JPG" />
+    <None Include="Resources\icons8-button-96.png" />
+    <None Include="Resources\anh1.jpg" />
+    <None Include="Resources\icons8-microsoft-excel-48.png" />
+    <None Include="Resources\a2.png" />
+    <None Include="Resources\tb1.png" />
+    <Content Include="voice.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
