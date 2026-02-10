@@ -2,16 +2,17 @@ import sys
 import time
 
 try:
-    import uiautomation as auto
+    import uiautomation as auto # type: ignore
     from uiautomation import PatternId, PropertyId
 except ImportError:
     auto = None
     PatternId = None
     PropertyId = None
 
-from pc_clipboard import copy_narrator_last_spoken
 from pc_element_info import build_element_info
 
+
+# region Constants & Configuration
 
 NARRATOR_FOCUS_DELAY = 0.35
 UIA_MISSING_MESSAGE = "ERROR: uiautomation library not available"
@@ -27,6 +28,10 @@ EXPAND_COLLAPSE_STATE_NAMES = {
     1: "Expanded",
 }
 
+# endregion
+
+
+# region Pattern Extractors
 
 def _extract_value_pattern(element):
     if element.GetPattern(PatternId.ValuePattern):
@@ -72,6 +77,10 @@ def _extract_position_in_set(element):
         return {"Index": pos, "Total": size}
     return None
 
+# endregion
+
+
+# region Control Pattern Configuration
 
 CONTROL_PATTERNS = {
     50004: ["Value"],                          # EditControl
@@ -91,6 +100,10 @@ PATTERN_HANDLERS = {
     "IsSelected": _extract_selection_item_pattern,
 }
 
+# endregion
+
+
+# region UIA Availability & Element Access
 
 def ensure_available():
     if auto is None:
@@ -110,6 +123,10 @@ def get_runtime_id(element):
         return None
     return element.GetRuntimeId()
 
+# endregion
+
+
+# region Element Info Extraction
 
 def _extract_base_properties(element):
     return element.Name or "", element.LocalizedControlType or ""
@@ -130,28 +147,51 @@ def _extract_all_patterns(element):
     return pattern_names, pattern_values
 
 
-def get_focused_element_info(narrator_text=None):
-    if not ensure_available():
-        return None
-
-    time.sleep(NARRATOR_FOCUS_DELAY)
-    element = auto.GetFocusedControl()
-    if element is None:
-        print("ERROR: No focused element found", file=sys.stderr)
-        return None
-
+def _build_info_from_element(element):
     name, control_type = _extract_base_properties(element)
     position = _extract_position_in_set(element)
     pattern_names, pattern_values = _extract_all_patterns(element)
-    
-    if narrator_text is None:
-        narrator_text = copy_narrator_last_spoken()
-
     return build_element_info(
         name=name,
         localized_control_type=control_type,
         position=position,
         pattern_order=pattern_names,
         pattern_values=pattern_values,
-        narrator_text=narrator_text,
     )
+
+# endregion
+
+
+# region Public API
+
+def get_focused_element_with_info():
+    """Get (element_info, runtime_id) in one call — avoids double GetFocusedControl."""
+    if not ensure_available():
+        return None, None
+    time.sleep(NARRATOR_FOCUS_DELAY)
+    element = auto.GetFocusedControl()
+    if element is None:
+        print("ERROR: No focused element found", file=sys.stderr)
+        return None, None
+    return _build_info_from_element(element), element.GetRuntimeId()
+
+
+def getFocusedElementInfo():
+    """Get information about currently focused element (no narrator capture)."""
+    if not ensure_available():
+        return None
+    time.sleep(NARRATOR_FOCUS_DELAY)
+    element = auto.GetFocusedControl()
+    if element is None:
+        print("ERROR: No focused element found", file=sys.stderr)
+        return None
+    return _build_info_from_element(element)
+
+# endregion
+
+
+# region Backward Compatibility
+
+get_focused_element_info = getFocusedElementInfo
+
+# endregion

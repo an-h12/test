@@ -7,7 +7,7 @@ def build_element_info(
     position,
     pattern_order,
     pattern_values,
-    narrator_text,
+    narrator_text=None,
 ):
     result = {
         "Name": name or "",

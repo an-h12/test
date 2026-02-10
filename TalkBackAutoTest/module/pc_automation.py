@@ -8,8 +8,15 @@ import pc_keys as keys
 import pc_clipboard as clipboard
 import pc_uia as uia
 
+
+# region Constants
+
 NARRATOR_CAPTURE_RETRY_DELAY = 0.2
 
+# endregion
+
+
+# region Narrator Text Validation
 
 def _normalize_text(value):
     return (value or "").strip().lower()
@@ -30,7 +37,7 @@ def _check_narrator_match(element_info, narrator_text):
     if control_type and control_type not in text:
         mismatches.append("ControlType")
     
-    return len(mismatches) == 0, mismatches
+    return not mismatches, mismatches
 
 
 def _capture_with_retry(element_info):
@@ -69,29 +76,36 @@ def _build_output_with_narrator(element_info, narrator_text, mismatches):
         narrator_text = f"{narrator_text}[Mismatch: {', '.join(mismatches)}]"
     return {"NarratorText": narrator_text, "Element": element_info}
 
+# endregion
+
+
+# region Element Capture & Processing
 
 def _has_cycle_detected(runtime_id, seen_ids):
     return runtime_id is not None and runtime_id in seen_ids
 
 
-def _track_initial_element(seen_ids):
-    element = uia.get_focused_control()
-    runtime_id = uia.get_runtime_id(element)
-    if runtime_id is not None:
-        seen_ids.add(runtime_id)
-
-
-def _process_tab_iteration(narrator_ready):
-    """Process one tab iteration, return (output_payload, runtime_id)."""
-    element = uia.get_focused_control()
-    runtime_id = uia.get_runtime_id(element)
-    element_info = uia.get_focused_element_info(narrator_text=None)
+def _capture_focused_element(narrator_ready):
+    element_info, runtime_id = uia.get_focused_element_with_info()
     narrator_text, mismatches = _maybe_capture_for_element(element_info, narrator_ready)
     return _build_output_with_narrator(element_info, narrator_text, mismatches), runtime_id
 
 
-def run_tab_sequence():
-    """Execute tab navigation with automatic cycle detection."""
+def _process_initial_element(narrator_ready, seen_ids):
+    if narrator_ready:
+        keys.force_narrator_read()
+    output, runtime_id = _capture_focused_element(narrator_ready)
+    if runtime_id is not None:
+        seen_ids.add(runtime_id)
+    return output, runtime_id
+
+# endregion
+
+
+# region Tab Navigation
+
+def dumpScreen():
+    """Matches C# PCTB.dumpScreen() - Execute tab navigation with automatic cycle detection."""
     if not uia.ensure_available():
         return False
     
@@ -104,19 +118,21 @@ def run_tab_sequence():
     
     try:
         narrator_ready = auto_enabled is not None
-        _track_initial_element(seen_ids)
+
+        initial_output, _ = _process_initial_element(narrator_ready, seen_ids)
+        print(json.dumps(initial_output, ensure_ascii=False))
 
         while True:
             if keys.is_escape_pressed():
                 print("Stopped by user", file=sys.stderr)
                 break
 
-            if not keys.press_tab():
+            if not keys.changeFocus():
                 print(f"Failed at iteration {count + 1}", file=sys.stderr)
                 return False
             count += 1
 
-            output, runtime_id = _process_tab_iteration(narrator_ready)
+            output, runtime_id = _capture_focused_element(narrator_ready)
 
             if _has_cycle_detected(runtime_id, seen_ids):
                 print(json.dumps(output, ensure_ascii=False))
@@ -136,6 +152,13 @@ def run_tab_sequence():
     return True
 
 
+run_tab_sequence = dumpScreen
+
+# endregion
+
+
+# region CLI Entry Point
+
 def main():
     if len(sys.argv) < 2:
         print("ERROR: Missing action argument", file=sys.stderr)
@@ -144,7 +167,7 @@ def main():
     action = sys.argv[1].lower()
 
     if action == "get_focused":
-        result = uia.get_focused_element_info()
+        result = uia.getFocusedElementInfo()
         print(json.dumps(result, ensure_ascii=False))
         sys.exit(0 if result is not None else 1)
 
@@ -153,7 +176,7 @@ def main():
         sys.exit(0 if success else 1)
 
     if action == "tab":
-        success = run_tab_sequence()
+        success = dumpScreen()
         sys.exit(0 if success else 1)
 
     print(f"ERROR: Unknown action '{action}'", file=sys.stderr)
@@ -162,3 +185,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# endregion

@@ -111,236 +111,102 @@ The system SHALL check Narrator state and clipboard text format once before star
 The system SHALL output the currently focused element before sending the first Tab press.
 
 ##### Scenario: Initial focused element printed
-- **WHEN** the tab sequence starts
-- **THEN** the system prints the current focused element info prior to the first Tab action
+```markdown
+## Purpose
 
-#### Requirement: Stop on repeated RuntimeId without printing duplicate
-The system SHALL stop the tab traversal when a RuntimeId repeats and SHALL NOT print the duplicate element.
+Consolidated project specs: combine current delta specs into a single authoritative file for PC automation. This file merges capabilities from `narrator-force-read`, `pc-automation-clean-code`, and `python-module-naming` while removing duplicates.
 
-##### Scenario: RuntimeId repeats
-- **WHEN** a newly focused element has a RuntimeId already seen in the current sequence
-- **THEN** the system stops the loop without emitting element info for the duplicate
+---
 
-#### Requirement: Continue tabbing when clipboard preflight fails
-The system SHALL continue tab traversal when clipboard text format is unavailable and SHALL set narrator_text to None for all emitted elements.
+## Capability: CLI contract & modularization
 
-##### Scenario: Clipboard text format unavailable
-- **WHEN** clipboard preflight detects no text format
-- **THEN** the system continues the sequence and outputs elements with narrator_text = None
+- Requirement: Single canonical CLI entrypoint
+	- The primary CLI entrypoint SHALL be `pc_automation.py` under `TalkBackAutoTest/module` to match C# subprocess integration.
 
-### Capability: Narrator clipboard cleanup
+- Requirement: Preserve CLI output contract
+	- `get_focused`, `narrator`, and `tab` actions SHALL keep existing stdout/stderr formats and exit codes.
 
-#### Requirement: Strip confirmation line from NarratorText
-The system SHALL remove the line "Copied last phrase to clipboard" from captured NarratorText before emitting output.
+- Requirement: Module naming and adapters
+	- Helper modules SHALL follow `pc_<name>.py` naming (e.g., `pc_uia.py`, `pc_clipboard.py`, `pc_keys.py`, `pc_element_info.py`).
+	- UIA access, clipboard access, and keyboard input SHALL live in separate adapter modules.
 
-##### Scenario: Confirmation line present
-- **WHEN** the captured clipboard text contains the confirmation line
-- **THEN** the system removes that line from NarratorText
+---
 
-#### Requirement: Capture after focus change
-The system SHALL capture NarratorText only after the focused element has been updated by the Tab action.
+## Capability: Force Narrator Read (narrator-force-read)
 
-##### Scenario: Tab traversal step
-- **WHEN** the tab loop moves focus to the next element
-- **THEN** the system captures NarratorText after the focus change
+- Requirement: Force Narrator to read current element
+	- The system SHALL provide a function to trigger Windows Narrator to read the currently focused element without changing focus.
 
-### Capability: Narrator capture stability
+- Requirement: Key event simulation for force read
+	- The function SHALL simulate the Narrator key (Caps Lock or Insert) + Tab using the Windows SendInput API and SHALL support a configurable hold time.
 
-#### Requirement: Filter failure messages from NarratorText
-The system SHALL remove the line "Failed to copy to clipboard" from captured NarratorText before emitting output.
+- Requirement: No focus change during force read
+	- Forcing a read SHALL NOT change focus or navigation state.
 
-##### Scenario: Failure line present
-- **WHEN** captured clipboard text contains the failure line
-- **THEN** the system removes that line from NarratorText
+---
 
-#### Requirement: Add short delay and retry for capture
-The system SHALL wait briefly after focus change and SHALL retry capture once if NarratorText is missing or mismatched.
+## Capability: Initial element capture & tab sequence
 
-##### Scenario: Initial capture mismatch
-- **WHEN** the first capture does not match the focused element
-- **THEN** the system waits briefly and retries capture once
+- Requirement: Preflight Narrator and clipboard once per tab sequence
+	- The system SHALL verify Narrator state and clipboard text format once before starting tab traversal.
 
-#### Requirement: Fallback to current clipboard text
-The system SHALL use the current clipboard text as NarratorText when capture fails and the clipboard text matches the focused element.
+- Requirement: Include current focused element before first Tab
+	- When a tab sequence starts with Narrator available, the system SHALL force-read and output the initially focused element before any Tab press.
 
-##### Scenario: Capture fails but clipboard matches
-- **WHEN** capture returns no NarratorText and clipboard text matches the focused element
-- **THEN** the system uses the clipboard text as NarratorText
+- Requirement: Track runtime id for cycle detection
+	- The system SHALL add the initial element's runtime id to the seen set to allow correct cycle detection.
 
-#### Requirement: Do not auto-toggle Narrator in tab mode
-The system SHALL NOT toggle Narrator on/off when running the tab command and SHALL only attempt capture if Narrator is already running.
+- Requirement: Stop on repeated RuntimeId
+	- The system SHALL stop traversal when a RuntimeId repeats; it SHALL NOT emit a duplicate element line.
 
-##### Scenario: Narrator is off
-- **WHEN** the tab command runs and Narrator is not running
-- **THEN** the system skips NarratorText capture without toggling Narrator
+---
 
-#### Requirement: Emit mismatch warnings
-The system SHALL emit `Mismatch: Name` and/or `Mismatch: ControlType` when captured NarratorText does not match the focused element.
+## Capability: Narrator clipboard capture & stability
 
-##### Scenario: Mismatch detected
-- **WHEN** NarratorText lacks the element Name or ControlType
-- **THEN** the system logs the appropriate mismatch warning and omits NarratorText in output
+- Requirement: Centralized single capture per element
+	- Narrator capture SHALL happen only at the automation layer (e.g., `_maybe_capture_for_element()`), not inside element-info extraction functions.
 
-#### Requirement: Log captured NarratorText for comparison
-The system SHALL log captured NarratorText to stderr for comparison when it is available.
+- Requirement: Capture via clipboard hotkey(s)
+	- The system SHALL trigger Narrator's copy-last-spoken hotkey and read the clipboard; it SHALL attempt primary key (Caps Lock) and MAY fall back to Insert if needed.
 
-##### Scenario: NarratorText captured
-- **WHEN** NarratorText is captured for an element
-- **THEN** the system logs NarratorText with the element Name/ControlType to stderr
+- Requirement: Delay and retry
+	- After focus change, system SHALL wait briefly and retry capture once if needed; the existing short-retry behavior SHALL be preserved.
 
-#### Requirement: Optional stdout NarratorText logging
-The system SHALL support optional NarratorText logging to stdout when debugging is enabled.
+- Requirement: Strip confirmation/failure lines
+	- The system SHALL remove lines like "Copied last phrase to clipboard" and "Failed to copy to clipboard" from captured text before emitting.
 
-##### Scenario: Debug stdout enabled
-- **WHEN** the environment variable `PC_AUTOMATION_NARRATOR_STDOUT=1` is set
-- **THEN** the system logs NarratorText to stdout for inspection
+- Requirement: Mismatch detection
+	- If captured NarratorText lacks element Name or LocalizedControlType, the system SHALL record mismatch labels (e.g., `Mismatch: Name`) and report them.
 
-##### Scenario: Direct CLI invocation
-- **WHEN** running `python pc_automation_cli.py tab` without the environment override
-- **THEN** the system logs NarratorText to stdout for inspection
+---
 
-### Capability: Tab sequence stop log
+## Capability: Clipboard handling
 
-#### Requirement: Skip initial focused element output
-The system SHALL record the initial focused element RuntimeId but SHALL NOT emit JSON for that element.
+- Requirement: Preserve and restore clipboard contents
+	- The system SHALL save and restore user clipboard contents around capture operations.
 
-##### Scenario: Sequence start
-- **WHEN** the tab sequence starts
-- **THEN** the system records the initial RuntimeId and emits no JSON yet
+- Requirement: Clear non-pinned clipboard history in tab loop
+	- During the CLI `tab` loop the system MAY clear non-pinned clipboard history after comparison; pinned items SHALL be preserved. If platform APIs are unavailable, document fallback behavior.
 
-#### Requirement: Emit output after Tab focus change
+- Requirement: Detect clipboard update via sequence number
+	- Use the clipboard sequence number to detect updates and wait for a change before reading text.
+
+---
+
+## Capability: Backward compatibility & docs
+
+- Requirement: Documentation reflects file names and entrypoint
+	- `README_DEV.txt` and C# examples SHALL reference `pc_automation.py` and the `pc_*.py` naming convention.
+
+- Requirement: Preserve existing behavior
+	- Any change SHALL avoid breaking existing C# integration; document any behavioral differences (e.g., initial element now emitted).
+
+---
+
+## Notes on deduplication
+
+- This merged file removes duplicated clipboard-clear and capture text paragraphs and consolidates overlapping requirements from multiple delta specs.
+- For specifics, the original delta specs are archived in `openspec/changes/archive/2026-02-10-first-element/`.
+
+``` 
 The system SHALL emit JSON only after a Tab press changes focus and NarratorText is captured for that focused element.
-
-##### Scenario: Tab step
-- **WHEN** a Tab press completes and focus moves to a new element
-- **THEN** the system captures NarratorText and emits JSON for that element
-
-#### Requirement: Emit output on repeated RuntimeId then stop
-The system SHALL emit JSON for the element whose RuntimeId repeats and SHALL stop the sequence afterward.
-
-##### Scenario: Cycle detected
-- **WHEN** the focused element RuntimeId matches a previously seen RuntimeId
-- **THEN** the system emits JSON for that element and stops the loop
-
-### Capability: Narrator clipboard log
-
-#### Requirement: Capture last spoken text via clipboard hotkey
-The system SHALL trigger Narrator's "Copy last spoken" hotkey and read the clipboard to obtain the most recently spoken text.
-
-##### Scenario: Successful capture after focus change
-- **WHEN** focus moves to a new element and Narrator is enabled
-- **THEN** the system captures the last spoken text from the clipboard
-
-#### Requirement: Support both Narrator keys
-The system SHALL attempt capture using both Caps Lock and Insert as the Narrator key to maximize compatibility.
-
-##### Scenario: Primary key fails, secondary succeeds
-- **WHEN** capture with Caps Lock does not update the clipboard
-- **THEN** the system retries using Insert and captures the text if available
-
-#### Requirement: Preserve user clipboard contents
-The system SHALL save the current clipboard contents before capture and restore them after reading Narrator text.
-
-##### Scenario: Clipboard restored after capture
-- **WHEN** the clipboard contains user data prior to capture
-- **THEN** the clipboard content is restored after the Narrator text is read
-
-#### Requirement: Emit NarratorText in JSON output
-The system SHALL include the captured Narrator speech text as `NarratorText` in JSON output for `get_focused` and `tab` actions.
-
-##### Scenario: get_focused output includes NarratorText
-- **WHEN** `get_focused` is executed and capture succeeds
-- **THEN** the JSON output includes `NarratorText` with the captured speech
-
-##### Scenario: tab output includes NarratorText per element
-- **WHEN** `tab` scans elements and capture succeeds for an element
-- **THEN** that element's JSON line includes `NarratorText`
-
-#### Requirement: Handle capture failure gracefully
-The system SHALL omit `NarratorText` and log an error to stderr if capture fails after retries.
-
-##### Scenario: Clipboard capture fails
-- **WHEN** the clipboard does not change after both Narrator keys and a re-hear retry
-- **THEN** the output omits `NarratorText` and stderr contains a failure message
-
-### Capability: Clipboard clear
-
-#### Requirement: Clear non-pinned clipboard history after comparison
-The system SHALL clear the current clipboard contents after each Narrator capture attempt in the CLI tab loop, after element-vs-NarratorText comparison when available, and SHALL perform the clear even if capture fails.
-
-##### Scenario: Capture attempt complete
-- **WHEN** a tab iteration completes its Narrator capture attempt and comparison (if any)
-- **THEN** the system clears the current clipboard contents
-
-##### Scenario: Capture fails
-- **WHEN** a tab iteration fails to capture NarratorText
-- **THEN** the system still performs the clipboard clear step
-
-#### Requirement: Preserve pinned clipboard items
-The system SHALL preserve pinned clipboard history items when clearing clipboard history.
-
-##### Scenario: Pinned entries exist
-- **WHEN** non-pinned clipboard history is cleared
-- **THEN** pinned items remain available in clipboard history
-
-#### Requirement: Fallback clear without pywin32
-The system SHALL set a safe sentinel text when win32clipboard is unavailable to ensure the clipboard is clean for the next iteration.
-
-##### Scenario: pywin32 missing
-- **WHEN** the clipboard clear helper is invoked and win32clipboard is not available
-- **THEN** the system writes a safe sentinel text to the clipboard
-
-#### Requirement: Scope clipboard clear to tab loop
-The system SHALL perform clipboard clearing only during the CLI tab loop and SHALL NOT clear clipboard contents for other CLI actions.
-
-##### Scenario: Non-tab command
-- **WHEN** `get_focused` or `narrator` is executed
-- **THEN** the system does not invoke the clipboard clear step
-
-#### Requirement: Log clear failures without stopping tab
-The system SHALL log clear failures to stderr and continue the tab sequence.
-
-##### Scenario: Clear operation fails
-- **WHEN** clearing clipboard history fails
-- **THEN** the system logs a warning to stderr and continues
-
-### Capability: Clipboard clear
-
-#### Requirement: Clear non-pinned clipboard history after comparison
-The system SHALL clear the current clipboard contents after each Narrator capture attempt in the CLI tab loop, after element-vs-NarratorText comparison when available, and SHALL perform the clear even if capture fails.
-
-##### Scenario: Capture attempt complete
-- **WHEN** a tab iteration completes its Narrator capture attempt and comparison (if any)
-- **THEN** the system clears the current clipboard contents
-
-##### Scenario: Capture fails
-- **WHEN** a tab iteration fails to capture NarratorText
-- **THEN** the system still performs the clipboard clear step
-
-#### Requirement: Preserve pinned clipboard items
-The system SHALL preserve pinned clipboard history items when clearing clipboard history.
-
-##### Scenario: Pinned entries exist
-- **WHEN** non-pinned clipboard history is cleared
-- **THEN** pinned items remain available in clipboard history
-
-#### Requirement: Fallback clear without pywin32
-The system SHALL set a safe sentinel text when win32clipboard is unavailable to ensure the clipboard is clean for the next iteration.
-
-##### Scenario: pywin32 missing
-- **WHEN** the clipboard clear helper is invoked and win32clipboard is not available
-- **THEN** the system writes a safe sentinel text to the clipboard
-
-#### Requirement: Scope clipboard clear to tab loop
-The system SHALL perform clipboard clearing only during the CLI tab loop and SHALL NOT clear clipboard contents for other CLI actions.
-
-##### Scenario: Non-tab command
-- **WHEN** `get_focused` or `narrator` is executed
-- **THEN** the system does not invoke the clipboard clear step
-
-#### Requirement: Log clear failures without stopping tab
-The system SHALL log clear failures to stderr and continue the tab sequence.
-
-##### Scenario: Clear operation fails
-- **WHEN** clearing clipboard history fails
-- **THEN** the system logs a warning to stderr and continues

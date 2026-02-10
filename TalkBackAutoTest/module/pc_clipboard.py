@@ -25,6 +25,8 @@ from pc_keys import (
 )
 
 
+# region Constants & Win32 API Setup
+
 CF_UNICODETEXT = 13
 GMEM_MOVEABLE = 0x0002
 SPI_GETSCREENREADER = 0x0046
@@ -61,8 +63,13 @@ _kernel32.GlobalLock.restype = wintypes.LPVOID
 _kernel32.GlobalLock.argtypes = [wintypes.HGLOBAL]
 _kernel32.GlobalUnlock.argtypes = [wintypes.HGLOBAL]
 
+# endregion
 
-def is_narrator_running():
+
+# region Narrator Process Management
+
+def IsNarratorRunning():
+    """Matches C# PCTB.IsNarratorRunning() - Check if Narrator is running"""
     if psutil is not None:
         for proc in psutil.process_iter(["name"]):
             name = (proc.info.get("name") or "").lower()
@@ -82,7 +89,7 @@ def is_narrator_running():
 def _wait_for_narrator_state(expected_running):
     delay = NARRATOR_TOGGLE_DELAY
     for _ in range(NARRATOR_TOGGLE_RETRIES):
-        if is_narrator_running() == expected_running:
+        if IsNarratorRunning() == expected_running:
             return True
         time.sleep(delay)
         delay *= 1.5
@@ -106,7 +113,7 @@ def _start_narrator_process():
 
 
 def _ensure_narrator_on():
-    if is_narrator_running():
+    if IsNarratorRunning():
         return False
     
     print("INFO: Narrator is off; auto-enabling for capture", file=sys.stderr)
@@ -131,6 +138,10 @@ def _restore_narrator_if_needed(auto_enabled):
     else:
         print("Failed to restore Narrator state", file=sys.stderr)
 
+# endregion
+
+
+# region Session Management
 
 def prepare_narrator_capture_session():
     """Ensure Narrator is running for a capture session."""
@@ -140,6 +151,10 @@ def prepare_narrator_capture_session():
 def restore_narrator_capture_session(auto_enabled):
     _restore_narrator_if_needed(auto_enabled)
 
+# endregion
+
+
+# region Clipboard Operations
 
 def preflight_clipboard_text_format():
     ok, _, has_text = get_clipboard_text()
@@ -176,10 +191,8 @@ def _open_clipboard(retries=CLIPBOARD_OPEN_RETRIES, delay=CLIPBOARD_OPEN_DELAY):
 
 
 def _get_clipboard_sequence_number():
-    try:
-        return _user32.GetClipboardSequenceNumber()
-    except Exception:
-        return None
+    return _user32.GetClipboardSequenceNumber()
+
 
 
 def _wait_for_clipboard_sequence_change(seq_before):
@@ -246,6 +259,10 @@ def set_clipboard_text(text):
     finally:
         _user32.CloseClipboard()
 
+# endregion
+
+
+# region Narrator Speech Capture
 
 def capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
     """Trigger Narrator's copy hotkey and return captured text."""
@@ -256,17 +273,19 @@ def capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
     if not has_text and not allow_no_text_format:
         return None
     
-    text = _try_capture_with_keys()
+    text = _try_narrator_capture()
     _restore_original_text(has_text, original_text)
     
     if text is None and log_failure:
         print("DEBUG: Narrator speech capture returned empty", file=sys.stderr)
     return text
-def _try_capture_with_keys():
-    text = _capture_with_key(VK_CAPITAL)
+
+
+def _try_narrator_capture():
+    text = _do_narrator_capture(VK_CAPITAL)
     if text is None:
         time.sleep(NARRATOR_CLIPBOARD_DELAY)
-        text = _capture_with_key(VK_CAPITAL)
+        text = _do_narrator_capture(VK_CAPITAL)
     return text
 
 
@@ -276,7 +295,7 @@ def _restore_original_text(had_text_format, original_text):
             print("Failed to restore clipboard text", file=sys.stderr)
 
 
-def _capture_with_key(narrator_vk):
+def _do_narrator_capture(narrator_vk):
     seq_before = _get_clipboard_sequence_number()
     send_key_chord([narrator_vk, VK_CONTROL, VK_X])
     
@@ -301,9 +320,13 @@ def _strip_narrator_confirmation(text):
     filtered = [line for line in lines if line and line.lower() not in blocked]
     return "\n".join(filtered)
 
+# endregion
 
-def copy_narrator_last_spoken():
-    """Capture Narrator text with auto-toggle if needed."""
+
+# region Public API
+
+def getNarratorOutput():
+    """Matches C# PCTB.getNarratorOutput() - Capture Narrator text with auto-toggle if needed."""
     auto_enabled = prepare_narrator_capture_session()
     if auto_enabled is None:
         return None
@@ -318,8 +341,19 @@ def copy_narrator_last_spoken():
 
 def try_capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
     """Capture if Narrator is already running."""
-    if not is_narrator_running():
+    if not IsNarratorRunning():
         return None
     if not allow_no_text_format and not preflight_clipboard_text_format():
         return None
     return capture_narrator_last_spoken(allow_no_text_format, log_failure)
+
+# endregion
+
+
+# region Backward Compatibility
+
+is_narrator_running = IsNarratorRunning
+haveNarratorProcess = IsNarratorRunning
+copy_narrator_last_spoken = getNarratorOutput
+
+# endregion
