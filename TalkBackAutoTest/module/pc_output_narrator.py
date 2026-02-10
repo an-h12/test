@@ -77,11 +77,11 @@ def IsNarratorRunning():
                 return True
         return False
     
-    print("WARNING: psutil unavailable; falling back to SPI", file=sys.stderr)
+    print("psutil unavailable; falling back to SPI", file=sys.stderr)
     enabled = wintypes.BOOL()
     ok = _user32.SystemParametersInfoW(SPI_GETSCREENREADER, 0, ctypes.byref(enabled), 0)
     if not ok:
-        print("WARNING: Unable to determine Narrator state", file=sys.stderr)
+        print("Unable to determine Narrator state", file=sys.stderr)
         return False
     return bool(enabled.value)
 
@@ -124,7 +124,7 @@ def _ensure_narrator_on():
     if _start_narrator_process() and _wait_for_narrator_state(True):
         return True
     
-    print("ERROR: Auto-toggle Narrator failed", file=sys.stderr)
+    print("Auto-toggle Narrator failed", file=sys.stderr)
     return None
 
 
@@ -159,7 +159,7 @@ def restore_narrator_capture_session(auto_enabled):
 def preflight_clipboard_text_format():
     ok, _, has_text = get_clipboard_text()
     if not ok:
-        print("ERROR: Clipboard unavailable for Narrator capture", file=sys.stderr)
+        print("Clipboard unavailable for Narrator capture", file=sys.stderr)
         return False
     return has_text
 
@@ -167,17 +167,17 @@ def preflight_clipboard_text_format():
 def clear_clipboard_history():
     """Clear clipboard history (Win+V) without affecting pinned items."""
     if WinrtClipboard is None:
-        print("WARNING: winrt unavailable; clipboard history not cleared", file=sys.stderr)
+        print("winrt unavailable; clipboard history not cleared", file=sys.stderr)
         return False
     
     try:
         result = WinrtClipboard.clear_history()
     except Exception:
-        print("WARNING: Failed to clear clipboard history", file=sys.stderr)
+        print("Failed to clear clipboard history", file=sys.stderr)
         return False
     
     if result is False:
-        print("WARNING: Clipboard history clear returned False", file=sys.stderr)
+        print("Clipboard history clear returned False", file=sys.stderr)
         return False
     return True
 
@@ -188,11 +188,6 @@ def _open_clipboard(retries=CLIPBOARD_OPEN_RETRIES, delay=CLIPBOARD_OPEN_DELAY):
             return True
         time.sleep(delay)
     return False
-
-
-def _get_clipboard_sequence_number():
-    return _user32.GetClipboardSequenceNumber()
-
 
 
 def _wait_for_clipboard_sequence_change(seq_before):
@@ -268,7 +263,7 @@ def capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
     """Trigger Narrator's copy hotkey and return captured text."""
     ok, original_text, has_text = get_clipboard_text()
     if not ok:
-        print("ERROR: Clipboard unavailable for Narrator capture", file=sys.stderr)
+        print("Clipboard unavailable for Narrator capture", file=sys.stderr)
         return None
     if not has_text and not allow_no_text_format:
         return None
@@ -296,7 +291,7 @@ def _restore_original_text(had_text_format, original_text):
 
 
 def _do_narrator_capture(narrator_vk):
-    seq_before = _get_clipboard_sequence_number()
+    seq_before = _user32.GetClipboardSequenceNumber()
     send_key_chord([narrator_vk, VK_CONTROL, VK_X])
     
     if not _wait_for_clipboard_sequence_change(seq_before):

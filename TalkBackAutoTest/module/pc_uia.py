@@ -15,7 +15,7 @@ from pc_element_info import build_element_info
 # region Constants & Configuration
 
 NARRATOR_FOCUS_DELAY = 0.35
-UIA_MISSING_MESSAGE = "ERROR: uiautomation library not available"
+UIA_MISSING_MESSAGE = "uiautomation library not available"
 
 
 TOGGLE_STATE_NAMES = {
@@ -171,7 +171,7 @@ def get_focused_element_with_info():
     time.sleep(NARRATOR_FOCUS_DELAY)
     element = auto.GetFocusedControl()
     if element is None:
-        print("ERROR: No focused element found", file=sys.stderr)
+        print("No focused element found", file=sys.stderr)
         return None, None
     return _build_info_from_element(element), element.GetRuntimeId()
 
@@ -183,7 +183,7 @@ def getFocusedElementInfo():
     time.sleep(NARRATOR_FOCUS_DELAY)
     element = auto.GetFocusedControl()
     if element is None:
-        print("ERROR: No focused element found", file=sys.stderr)
+        print("No focused element found", file=sys.stderr)
         return None
     return _build_info_from_element(element)
 

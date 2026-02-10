@@ -1,0 +1,20 @@
+1.Xây dựng module hàm ON/OFF/Check status của Narrator
+- File: pc_keys.py, pc_output_narrator.py
+- API:
++ Bật/Tắt Narrator: toggle_narrator()
++ Check status Narrator: IsNarratorRunning()
++ Tự động bật Narrator: prepare_narrator_capture_session()
+
+2.Xây dựng hàm get focused object information
+- File: pc_uia.py, pc_keys.py
+- API:
++ Lấy thông tin phần tử: getFocusedElementInfo()
++ Lấy định danh phần tử: get_runtime_id()
++ Thực hiện Tab: changeFocus()
+
+3.Xây dựng hàm get output Narrator
+- File: pc_output_narrator.py
+- API:
++ Lấy nội dung Narrator: getNarratorOutput()
++ Buộc Narrator đọc: force_narrator_read()
++ Xóa lịch sử Clipboard: clear_clipboard_history()

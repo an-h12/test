@@ -5,7 +5,7 @@ import sys
 import time
 
 import pc_keys as keys
-import pc_output_narrator as clipboard
+import pc_output_narrator as narrator
 import pc_uia as uia
 
 
@@ -42,7 +42,7 @@ def _check_narrator_match(element_info, narrator_text):
 
 def _capture_with_retry(element_info):
     time.sleep(NARRATOR_CAPTURE_RETRY_DELAY)
-    first = clipboard.try_capture_narrator_last_spoken(
+    first = narrator.try_capture_narrator_last_spoken(
         allow_no_text_format=True, log_failure=False
     )
     
@@ -51,7 +51,7 @@ def _capture_with_retry(element_info):
         return first
     
     time.sleep(NARRATOR_CAPTURE_RETRY_DELAY)
-    second = clipboard.try_capture_narrator_last_spoken(
+    second = narrator.try_capture_narrator_last_spoken(
         allow_no_text_format=True, log_failure=False
     )
     return second or first
@@ -65,8 +65,8 @@ def _maybe_capture_for_element(element_info, narrator_ready):
     _, mismatches = _check_narrator_match(element_info, text)
     
     if text:
-        if not clipboard.clear_clipboard_history():
-            print("WARNING: Clipboard history clear failed", file=sys.stderr)
+        if not narrator.clear_clipboard_history():
+            print("Clipboard history clear failed", file=sys.stderr)
     
     return text, mismatches
 
@@ -105,7 +105,7 @@ def _process_initial_element(narrator_ready, seen_ids):
 # region Tab Navigation
 
 def dumpScreen():
-    """Matches C# PCTB.dumpScreen() - Execute tab navigation with automatic cycle detection."""
+    """Execute tab navigation with automatic cycle detection."""
     if not uia.ensure_available():
         return False
     
@@ -114,7 +114,7 @@ def dumpScreen():
 
     count = 0
     seen_ids = set()
-    auto_enabled = clipboard.prepare_narrator_capture_session()
+    auto_enabled = narrator.prepare_narrator_capture_session()
     
     try:
         narrator_ready = auto_enabled is not None
@@ -144,7 +144,7 @@ def dumpScreen():
 
             print(json.dumps(output, ensure_ascii=False))
     finally:
-        clipboard.restore_narrator_capture_session(auto_enabled)
+        narrator.restore_narrator_capture_session(auto_enabled)
 
     sys.stdout.flush()
     print(f"Tab pressed {count} time(s)", file=sys.stderr)
@@ -161,7 +161,7 @@ run_tab_sequence = dumpScreen
 
 def main():
     if len(sys.argv) < 2:
-        print("ERROR: Missing action argument", file=sys.stderr)
+        print("Missing action argument", file=sys.stderr)
         sys.exit(1)
 
     action = sys.argv[1].lower()
@@ -180,7 +180,7 @@ def main():
         success = dumpScreen()
         sys.exit(0 if success else 1)
 
-    print(f"ERROR: Unknown action '{action}'", file=sys.stderr)
+    print(f"Unknown action '{action}'", file=sys.stderr)
     sys.exit(1)
 
 
