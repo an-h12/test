@@ -286,5 +286,29 @@ namespace TalkBackAutoTest.Properties {
                 this["envMode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int pcmodeTesting {
+            get {
+                return ((int)(this["pcmodeTesting"]));
+            }
+            set {
+                this["pcmodeTesting"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int pcmethodouput {
+            get {
+                return ((int)(this["pcmethodouput"]));
+            }
+            set {
+                this["pcmethodouput"] = value;
+            }
+        }
     }
 }

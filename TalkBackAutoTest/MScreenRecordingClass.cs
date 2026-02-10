@@ -109,10 +109,6 @@ namespace TalkBackAutoTest
         string FFMPEG = Path.GetDirectoryName(Application.ExecutablePath).ToString() + "\\ffmpeg.exe";
         Process p0 = new Process();
 
-
-
-
-
         public void startRecordScreen(string path, string fileName)
         {
 

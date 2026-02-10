@@ -21,16 +21,20 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using System.Management;
 
 
 //using System.Linq;
 //using System.Text.RegularExpressions;
 using WK.Libraries.BetterFolderBrowserNS;
+using Microsoft.Win32;
 namespace TalkBackAutoTest
 {
     public partial class MainForm : Form
     {
+        //PC
 
+        PCTB PCManager;
         //
         public string WORKSPACE
         {
@@ -137,8 +141,12 @@ namespace TalkBackAutoTest
 
 
             int modeTesting = TalkBackAutoTest.Properties.Settings.Default.modeTesting;
+            int pcmodeTesting = TalkBackAutoTest.Properties.Settings.Default.pcmodeTesting;
+            int pcmethodouput = TalkBackAutoTest.Properties.Settings.Default.pcmethodouput;
 
-            
+
+
+
 
 
             txtList_language_word.Text = TalkBackAutoTest.Properties.Settings.Default.blacklist_language_word;
@@ -156,11 +164,33 @@ namespace TalkBackAutoTest
             if (envMode == 1)
             {
                 rbAndroidMode.Checked = true;
+                SwapMode(1);
             }
             else
             {
                 rbWindowMode.Checked = true;
+                SwapMode(2);
             }
+
+            //pc
+            if (pcmodeTesting == 1)
+            {
+                rdPC_StressMode.Checked = true;
+            }
+            else if (pcmodeTesting == 2)
+            {
+                rdPC_SemiMode.Checked = true;
+            }
+
+            if (pcmethodouput == 1)
+            {
+                rdPCNarrator.Checked = true;
+            }
+            else if (pcmethodouput == 2)
+            {
+                rdPCNVDA.Checked = true;
+            }
+            //end pc
 
 
             if (modeTesting == 1)
@@ -184,6 +214,17 @@ namespace TalkBackAutoTest
             readXml(@xmlPath);
 
             readLog();
+
+
+            initrporjectPC();
+
+
+        }
+
+        private void initrporjectPC()
+        {
+            PCManager = new PCTB();
+            cbLangguagePC.SelectedIndex = 0;
         }
 
         private void initKindOfIssue()
@@ -342,7 +383,7 @@ namespace TalkBackAutoTest
                 //    return 0;//ok
                 //}
 
-                if (inputWords.Length ==1 && count ==1)//chi co 1 tu duy nhat, kha nang cao ten rieng
+                if (inputWords.Length == 1 && count == 1)//chi co 1 tu duy nhat, kha nang cao ten rieng
                 {
                     return -1;
                 }
@@ -405,7 +446,7 @@ namespace TalkBackAutoTest
 
         }
         string globalSamePrevious = "";
-        private int SamePrevious(string talkbackText, string previousTalkbackText,string currentScreen,string previousScreen)
+        private int SamePrevious(string talkbackText, string previousTalkbackText, string currentScreen, string previousScreen)
         {
             //toi uu
             globalSamePrevious = "";
@@ -1121,7 +1162,7 @@ namespace TalkBackAutoTest
 
                         if (previousId >= 0 && cb_RepeatPreviousObject.Checked == true && result != "Fail" && RemoveBlackListRepeat(talkbackText) != "")
                         {
-                            int rs = SamePrevious(talkbackText, previousTalkbackText,currentScreen, listObject[previousId].screen);
+                            int rs = SamePrevious(talkbackText, previousTalkbackText, currentScreen, listObject[previousId].screen);
                             if (rs == 1)
                             {
                                 //result = "Fail";//Consider -> remark how to check again?
@@ -1446,35 +1487,25 @@ namespace TalkBackAutoTest
 
         private void btnExport_Click(object sender, EventArgs e)
         {
-            //getAnotherObjectsFromStartEnd(0, 80);
-            // int a = 5;
+            if (TalkBackAutoTest.Properties.Settings.Default.envMode == 1)
+            {
+                ExportExcelAndroidMode();
+            }
+            else
+            {
+                ExportExcelPCMode();
+            }
+        }
 
-            //SamePrevious("Default calendar color, Select color","Default calendar color, Select color");
-            //RemoveWholeBlackList("Create note, Button");
-            //SamePrevious("M.hình khóa, đã chọn, Hộp kiểm", "Lock scre1e1n, not checked, Check box");
-            //ischangelang("Text Summary","vi");
-            //removeElement("Đã chọn, 1232");
-            //string folderpath = @"D:\F_Folder\2025\TalkBack\ToastImg";
-            //string sourceFile1 = @"1_obj1.png";
-            //string sourceFile2 = @"1_obj3.png";
-            //string sourceFile3 = @"2_obj1.png";
-            //string sourceFile4 = @"3_obj1.png";
-            //string sourceFile5 = @"5_obj1.png";
-            //string sourceFile6 = @"old1_obj1.png";
-            //string sourceFile7 = @"1_obj24.png";
-            //int it = 1;
-            //cropTBOptimize(@folderpath, @folderpath + "/" + sourceFile1, @folderpath + "/croptb_" + sourceFile1, it);
-            //cropTBOptimize(@folderpath, @folderpath + "/" + sourceFile2, @folderpath + "/croptb_" + sourceFile2, it);
-            //cropTBOptimize(@folderpath, @folderpath + "/" + sourceFile3, @folderpath + "/croptb_" + sourceFile3, it);
-            //cropTBOptimize(@folderpath, @folderpath + "/" + sourceFile4, @folderpath + "/croptb_" + sourceFile4, it);
-            //cropTBOptimize(@folderpath, @folderpath + "/" + sourceFile5, @folderpath + "/croptb_" + sourceFile5, it);
-            //cropTBOptimize(@folderpath, @folderpath + "/" + sourceFile6, @folderpath + "/croptb_" + sourceFile6, it);
-            //cropTBOptimize(@folderpath, @folderpath + "/" + sourceFile7, @folderpath + "/croptb_" + sourceFile7, it);
-            //int a = 5;
-            //getAnotherObjectsFromStartEnd(0, 12);
+        private void ExportExcelAndroidMode()
+        {
             ExportExcel(txtWS.Text + "//result.xml");
         }
 
+        private void ExportExcelPCMode()
+        {
+            ExportExcel(txtWS.Text + "//result.xml");
+        }
 
         private bool isExistedObject(Object o)
         {
@@ -2350,347 +2381,13 @@ namespace TalkBackAutoTest
             updateXML();
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         private string getCurrentLang()
         {
+            if (TalkBackAutoTest.Properties.Settings.Default.envMode == 2)// PC
+            {
+                return "en";
+            }
+
             string currentLocale = getCurrentLocale();
             string language = "en";
             if (currentLocale == "vi-VN") language = "vi";
@@ -2751,6 +2448,84 @@ namespace TalkBackAutoTest
                 return listObject.Count;
             }
         }
+
+
+
+
+        //pc
+        private void getObjectInScreenPC(int MAX1SCREEN, string testingmode)
+        {
+            Object firsTObject = null;
+
+            for (int i = 1; i <= 1000; i++)
+            {
+                if (i == 20)
+                {
+                    break;
+                }
+
+                //
+                try
+                {
+                    //create folder result
+                    int numberOfObject = getNumberOfObject();
+                    ////end 2605
+                    string folderResult = @txtWS.Text + "//Result//" + "obj" + (numberOfObject + 1);
+
+                    string fileObject = (numberOfObject + 1) + "";
+                    string fileName = "obj" + fileObject + ".mp4";
+                    string videoPath = @folderResult + "/" + fileName;
+
+                    if (Directory.Exists(@folderResult))
+                    {
+                        deleteOldData(@folderResult);
+                    }
+                    if (!Directory.Exists(@folderResult))
+                    {
+                        System.IO.Directory.CreateDirectory(@folderResult);
+                    }
+
+                    PCManager.StartRecordVideo(videoPath);
+                    PCManager.cleanLogPC();
+
+                    PCManager.changeFocus();
+                    PCManager.StopRecordVideo();
+
+                    PCManager.getNarratorOutput();
+                    PCManager.dumpFocusedObject();
+                    PCManager.dumpScreen();
+                    PCManager.checkIssue("1", "2");
+
+                    PCManager.getObjectScreenShot();
+                    PCManager.getLogPC();
+
+
+
+                    Object o = PCManager.getFocusedObjectFake(numberOfObject+1);
+                    if (o == null)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        //kiem tra firsTObject voi o hien tai neu ma trung thi break khoi vong lap hien tai
+                        firsTObject = o;
+                        listObject.Add(o);
+                        updateXML();
+                        //syncHashMap(o);
+                    }   
+
+                }
+                catch (Exception ex)
+                {
+                    printLog("getObjectInScreen Inside:" + ex.Message, "error");
+                }
+            }
+        }
+
+
+
+        //endpC
 
         private void getObjectInScreen(int MAX1SCREEN, string testingmode)
         {
@@ -3127,7 +2902,7 @@ namespace TalkBackAutoTest
 
         private bool InBlackListScreen(string screenName)
         {
-            string blacklist_screen = TalkBackAutoTest.Properties.Settings.Default.blacklist_screen; 
+            string blacklist_screen = TalkBackAutoTest.Properties.Settings.Default.blacklist_screen;
             string[] lines = blacklist_screen.Split(new string[] { "\r\n" }, StringSplitOptions.None);
             foreach (string line in lines)
             {
@@ -3140,6 +2915,88 @@ namespace TalkBackAutoTest
             return false;
         }
 
+        private void RunProjectWithNewThreadPC()
+        {
+            try
+            {
+                int MAX1SCREEN = txtEventNumberMax1screen.Text == "" ? 200 : Int16.Parse(txtEventNumberMax1screen.Text);
+                int MAXALLSCREEN = txtEventNumberMaxAll.Text == "" ? 1000 : Int16.Parse(txtEventNumberMaxAll.Text);
+
+                if (rdPC_StressMode.Checked == true)//STRESSTEST MODE
+                {
+                    //random APP???
+                    //START APP and stresshere
+                    //end
+                    UIAppInfo x = PCManager.startUWPApp("SAMSUNGELECTRONICSCoLtd.SamsungNotes_wyx1vj98g3asy!App");
+                    updateListApponComboBox(x);
+
+                    PCManager.StartNarratorNVDA();
+                    int pId = getTestingPID_PC();
+                    if (pId != -1)
+                    {
+                        PCManager.ActivateWindowByPID(pId);
+                    }
+
+                    int indexStart = getNumberOfObject();
+                    PCManager.gotoScreen("AppName");
+
+
+                    string testtingMode = "random";
+                    getObjectInScreenPC(MAX1SCREEN, testtingMode);
+
+                    int indexEnd = getNumberOfObject();
+                    //getAnotherObjectsFromStartEnd(indexStart, indexEnd);
+                    //talkback off
+                    PCManager.StopNarratorNVDA();
+                    this.Invoke(new Action(() =>
+                    {
+                        MessageBox.Show("Test Semi-Auto for PC done. please try more screens");
+                    }));
+
+                }
+                else if (rdPC_SemiMode.Checked == true)//SEMI MODE
+                {
+
+                    PCManager.StartNarratorNVDA();
+
+                    int pId = getTestingPID_PC();
+                    if (pId != -1)
+                    {
+                        PCManager.ActivateWindowByPID(pId);
+                    }
+
+                    int indexStart = getNumberOfObject();
+                    PCManager.gotoScreen("AppName");
+
+
+                    string testtingMode = "random";
+                    getObjectInScreenPC(MAX1SCREEN, testtingMode);
+
+                    int indexEnd = getNumberOfObject();
+                    //getAnotherObjectsFromStartEnd(indexStart, indexEnd);
+                    //talkback off
+                    PCManager.StopNarratorNVDA();
+                    this.Invoke(new Action(() =>
+                    {
+                        MessageBox.Show("Test Semi-Auto for PC done. please try more screens");
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                printLog(ex.Message, "error");
+            }
+            finally
+            {
+
+                this.Invoke(new Action(() =>
+                {
+                    btnRun.Text = "Run";
+                    btnRun.BackColor = Color.FromArgb(192, 255, 192);
+                }));
+            }
+
+        }
 
 
         private void RunProjectWithNewThread()
@@ -3200,7 +3057,7 @@ namespace TalkBackAutoTest
                                 while (true)
                                 {
                                     //string actualStressTestPkg = stressTestPkg;
-                                    string outputCommand ="";
+                                    string outputCommand = "";
                                     if (stressTestPkg == ALL_APPS)
                                     {
                                         //actualStressTestPkg = "com.sec.android.app.clockpackage";
@@ -3247,7 +3104,7 @@ namespace TalkBackAutoTest
                                     if (currentScreen != oldScreen)
                                     {
                                         oldScreen = currentScreen;
-                                        
+
                                         break;
                                     }
                                     if (idxTimeout >= 8)
@@ -3297,7 +3154,7 @@ namespace TalkBackAutoTest
                     TALKBACK_OFF();
                     this.Invoke(new Action(() =>
                     {
-                     MessageBox.Show("Test StressTest done. please try more screens");
+                        MessageBox.Show("Test StressTest done. please try more screens");
                     }));
                 }
                 else if (rbManualMode.Checked == true)//dang o 1 man hinh manual
@@ -3312,7 +3169,7 @@ namespace TalkBackAutoTest
                     if (InBlackListScreen(currentScreen))
                     {
                         MessageBox.Show("Bot support because it's in Blacklist screen. please try more screens");
-                        return;       
+                        return;
                     }
 
                     //02. Talkback On
@@ -3337,7 +3194,7 @@ namespace TalkBackAutoTest
                         return;
                     }
 
-                   
+
                     testtingMode = "ACTIVITY MODE";
                     string GLOBAL_FAIL = "Consider";
                     string GLOBAL_PASS = "Pass";
@@ -3345,7 +3202,7 @@ namespace TalkBackAutoTest
 
 
 
-                   
+
 
 
                     if (stressTestPkg == ALL_APPS)
@@ -3359,7 +3216,7 @@ namespace TalkBackAutoTest
 
                     //02. Talkback On
                     TALKBACK_ON();
-                   
+
                     //grant permission of activity
                     //GrantPermission(stressTestPkg, "grant");
                     //get All activites of package
@@ -3376,7 +3233,7 @@ namespace TalkBackAutoTest
 
                     string path = txtWS.Text + "\\list_activity.txt";
                     kq_activity = File.ReadAllLines(@path);
-                    
+
 
 
                     //foreach al activity
@@ -3412,7 +3269,7 @@ namespace TalkBackAutoTest
 
                                 if (isFCAndAnr())
                                 {
-                                    printLog("Not check activity: "+rs[1]+" because of: FC or ANR");
+                                    printLog("Not check activity: " + rs[1] + " because of: FC or ANR");
                                     cleanLogcat();
                                     continue;
                                 }
@@ -3450,7 +3307,7 @@ namespace TalkBackAutoTest
                     //start activity if not fc
                     //fc skip
 
-                    
+
 
                     //endfor
 
@@ -3482,15 +3339,15 @@ namespace TalkBackAutoTest
                         btnRun.Text = "Run";
                         btnRun.BackColor = Color.FromArgb(192, 255, 192);
                     }));
-                }
-                //dasd
-                //update again button stop thread
-                printLog("TRYCAT_FINNALLY", "error");
-                if (threadRunProject != null && threadRunProject.IsAlive)
-                {
-                    threadRunProject.Abort();
-                }
-                TALKBACK_OFF();
+            }
+            //dasd
+            //update again button stop thread
+            printLog("TRYCAT_FINNALLY", "error");
+            if (threadRunProject != null && threadRunProject.IsAlive)
+            {
+                threadRunProject.Abort();
+            }
+            TALKBACK_OFF();
         }
 
 
@@ -3516,7 +3373,7 @@ namespace TalkBackAutoTest
                     string output1 = p1.StandardError.ReadToEnd();
                     string output2 = p1.StandardOutput.ReadToEnd();
                     p1.WaitForExit();
-                    return output1 +" "+output2;
+                    return output1 + " " + output2;
                 }
                 else
                 {
@@ -3640,7 +3497,9 @@ namespace TalkBackAutoTest
                 return "";
             }
         }
-        private void btnRun_Click(object sender, EventArgs e)
+
+
+        private void RunAndroidMode()
         {
             //detect environment
             //set active tab
@@ -3701,6 +3560,79 @@ namespace TalkBackAutoTest
             else
             {
                 MessageBox.Show("Please connect device first");
+            }
+        }
+        private void RunPCMode()
+        {
+            //Thread here
+            //MessageBox.Show("Ongoing");
+            tabControl1.SelectTab(tabPage1);
+
+            if (btnRun.Text == "Run")
+            {
+                DialogResult dialogResult = MessageBox.Show("Do you want run this project for Win Application?", "Run Project", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+
+                    string msg = PCManager.checkPCEnvironemnet();
+                    if (msg != "")
+                    {
+                        MessageBox.Show(msg);
+                        return;
+                    }
+
+                    ConfirmPopUp f1 = new ConfirmPopUp();
+                    f1.StartPosition = FormStartPosition.CenterParent;
+                    f1.TopMost = true;
+                    var result = f1.ShowDialog();
+
+                    if (result == DialogResult.Yes)
+                    {
+                        listObject.Clear();
+                        hashMap.Clear();
+                        //updateNumberOfProject(0);
+                        //delete Result folder?????
+                        deleteResultFolder();
+                        //end
+                    }
+
+
+                    threadRunProject = new Thread(RunProjectWithNewThreadPC);
+                    threadRunProject.Name = "Run Project with new Thread";
+                    if (!threadRunProject.IsAlive)
+                        threadRunProject.Start();
+
+                    btnRun.Text = "Stop";
+                    btnRun.BackColor = Color.FromArgb(255, 128, 128);
+                }
+            }
+            else//stop
+            {
+                DialogResult dialogResult = MessageBox.Show("Do you want stop project?", "Stop Project", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    threadRunProject.Abort();
+                    btnRun.Text = "Run";
+                    btnRun.BackColor = Color.FromArgb(192, 255, 192);
+                    stopMonkey();
+                }
+            }
+
+
+           
+
+           
+        }
+
+        private void btnRun_Click(object sender, EventArgs e)
+        {
+            if (TalkBackAutoTest.Properties.Settings.Default.envMode == 1)//android
+            {
+                RunAndroidMode();
+            }
+            else
+            {
+                RunPCMode();
             }
         }
 
@@ -3781,7 +3713,7 @@ namespace TalkBackAutoTest
 
         private void fakeCombobox()
         {
-            
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -4248,10 +4180,13 @@ namespace TalkBackAutoTest
                             Object o = new Object(Int16.Parse(No), FocusedObject, Screen, Package, PkgVersion, ObjectInformation, TalkbackText, Result, TestingTime, Remark, TestingMode, DeviceInf, ErrorType);
                             listObject.Add(o);
                             //hash map here
-                            syncHashMap(o);
+                            if (TalkBackAutoTest.Properties.Settings.Default.envMode == 1)
+                            {
+                                syncHashMap(o);
+                            }
                             //end hashmap
 
-                            
+
                         }
                         catch (Exception ex)
                         {
@@ -4273,20 +4208,27 @@ namespace TalkBackAutoTest
 
         private void syncHashMap(Object o)
         {
-            string info1 = UnescapeXml(o.objectInformation);
-            XElement script1 = XElement.Parse(info1);
-            XDocument doc1 = XDocument.Parse(script1.ToString());
-            var childs1 = doc1.Descendants("node");
-            string resId1 = "", clazz1 = "", text1 = "", des1 = "";
-            foreach (XElement x in childs1)
+            try
             {
-                resId1 += x.Attribute("resource-id").Value.ToString() + " ";
-                clazz1 += x.Attribute("class").Value.ToString() + " ";
-                text1 += x.Attribute("text").Value.ToString() + " ";
-                des1 += x.Attribute("content-desc").Value.ToString() + " ";
-                //break;
+                string info1 = UnescapeXml(o.objectInformation);
+                XElement script1 = XElement.Parse(info1);
+                XDocument doc1 = XDocument.Parse(script1.ToString());
+                var childs1 = doc1.Descendants("node");
+                string resId1 = "", clazz1 = "", text1 = "", des1 = "";
+                foreach (XElement x in childs1)
+                {
+                    resId1 += x.Attribute("resource-id").Value.ToString() + " ";
+                    clazz1 += x.Attribute("class").Value.ToString() + " ";
+                    text1 += x.Attribute("text").Value.ToString() + " ";
+                    des1 += x.Attribute("content-desc").Value.ToString() + " ";
+                    //break;
+                }
+                hashMap[resId1 + "_" + clazz1 + "_" + text1 + "_" + des1] = o;
             }
-            hashMap[resId1 + "_" + clazz1 + "_" + text1 + "_" + des1] = o;
+            catch (Exception ex)
+            {
+                printLog(ex.Message);
+            }
         }
 
         private void updateDeviceInfomationonUI(string modelName, string binaryName, string serial, string type, string branch)
@@ -4413,11 +4355,8 @@ namespace TalkBackAutoTest
             //end
         }
 
-        private void getDeviceInformation(int mode = 0)
-        {
-
-
-            //string serial = getSerial();
+        private void getDeviceInformationAndroid(int mode = 0)
+        {//string serial = getSerial();
             string output = getAdbDevice();
             string[] serials = getDevicesArr(output);
             string serial_no = (serials.Length >= 1) ? serials[0] : "";
@@ -4430,8 +4369,6 @@ namespace TalkBackAutoTest
             {
                 threadRunProject.Abort();
             }
-
-
 
             if (serials.Count() > 1)//tu 2 devices
             {
@@ -4504,6 +4441,97 @@ namespace TalkBackAutoTest
 
             }
 
+
+        }
+
+        private void getDeviceInformationPC(int mode)
+        {
+            printLog("Ongoing get PC environment");
+            string computerName = Environment.MachineName;
+            string modelName = GetWMIValue("Win32_ComputerSystem", "Model");
+            string manufacturer = GetWMIValue("Win32_ComputerSystem", "Manufacturer");
+            manufacturer = manufacturer.Contains("SAMSUNG") ? "SAMSUNG" : manufacturer;
+            string os = GetOSInfo();//binary name
+
+            updateDeviceInfomationonUI(modelName, os, computerName, "Window App Mode", manufacturer);
+        }
+
+        //pc
+
+        public static string GetDisplayLanguage()
+        {
+            try
+            {
+                // Cách 1: Lấy từ Registry (chính xác nhất)
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop\MUI"))
+                {
+                    string[] languages = key.GetValue("PreferredUILanguages") as string[];
+                    if (languages != null && languages.Length > 0)
+                    {
+                        CultureInfo culture = new CultureInfo(languages[0]);
+                        return culture.DisplayName; // Ví dụ: "English (United States)"
+                    }
+                }
+
+                // Cách 2: Lấy từ CultureInfo (nếu Registry không có)
+                return CultureInfo.InstalledUICulture.DisplayName;
+            }
+            catch
+            {
+                return "Unknown";
+            }
+        }
+
+        public string GetOSInfo()
+        {
+            try
+            {
+                using (var searcher = new ManagementObjectSearcher("SELECT Caption, Version FROM Win32_OperatingSystem"))
+                {
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        string osName = obj["Caption"].ToString();
+                        string osVersion = obj["Version"].ToString();
+                        return osName.Replace("Microsoft Windows", "Win") + " Ver: " + osVersion + "";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+            return "Unknown OS";
+        }
+
+        private static string GetWMIValue(string wmiClass, string propertyName)
+        {
+            try
+            {
+                using (var searcher = new ManagementObjectSearcher("SELECT " + propertyName + " FROM " + wmiClass))
+                {
+                    foreach (ManagementObject obj in searcher.Get())
+                    {
+                        return obj[propertyName].ToString();
+                    }
+                }
+            }
+            catch { }
+            return "N/A";
+        }
+        //end pc
+
+
+
+        private void getDeviceInformation(int mode = 0)
+        {
+            if (TalkBackAutoTest.Properties.Settings.Default.envMode == 1)
+            {
+                getDeviceInformationAndroid(mode);
+            }
+            else
+            {
+                getDeviceInformationPC(mode);
+            }
         }
 
         private string getSerial()
@@ -4785,11 +4813,13 @@ namespace TalkBackAutoTest
         private void Form1_Shown(object sender, EventArgs e)
         {
             getDeviceInformation();
-            initProject();  
+            initProject();
             updatecomboBoxPkg();
             initcomboBox();
 
-                    
+            updateListApponComboBox();
+
+
         }
 
         private string getPackageVersion(string packageName)
@@ -7903,11 +7933,6 @@ namespace TalkBackAutoTest
 
         private void btnGuide_Click(object sender, EventArgs e)
         {
-            //getTTSText();
-            //SamePrevious("Not checked, Check box, memory","Not checked, Check box, memory");
-
-            
-
             GuideForm f1 = new GuideForm();
             f1.StartPosition = FormStartPosition.CenterParent;
             f1.ShowDialog();
@@ -7937,7 +7962,7 @@ namespace TalkBackAutoTest
                 List<AppName> searchList = new List<AppName>();
                 foreach (AppName x in listAppName)
                 {
-                    if(x.pkgName.ToLower().Contains(txtSearchPkg.Text.ToLower()) || x.appName.ToLower().Contains(txtSearchPkg.Text.ToLower()))
+                    if (x.pkgName.ToLower().Contains(txtSearchPkg.Text.ToLower()) || x.appName.ToLower().Contains(txtSearchPkg.Text.ToLower()))
                     {
                         searchList.Add(x);
                     }
@@ -8024,7 +8049,7 @@ namespace TalkBackAutoTest
                 {
                     if (x.supportMonkey == true)
                     {
-                        monkeyList.Add(new AppName(x.appName,x.pkgName,x.supportMonkey));
+                        monkeyList.Add(new AppName(x.appName, x.pkgName, x.supportMonkey));
                     }
                 }
 
@@ -8268,7 +8293,7 @@ namespace TalkBackAutoTest
         //GET ACTIVITIES
 
         //GRANT PERMISSION
-        private void GrantPermission(string packageName,string type)
+        private void GrantPermission(string packageName, string type)
         {
             string[] permissionsList = getPermissionList(packageName);
             if (permissionsList != null)
@@ -8315,8 +8340,8 @@ namespace TalkBackAutoTest
                         }
 
                         string[] rs = line.Split(new string[] { ";" }, StringSplitOptions.None);
-                        adbCommand+="pm " + type + " " + rs[0] + " " + rs[1]+";";
-                       
+                        adbCommand += "pm " + type + " " + rs[0] + " " + rs[1] + ";";
+
 
 
                     }
@@ -8327,7 +8352,7 @@ namespace TalkBackAutoTest
                     }
 
                 }
-                
+
                 //here
             }
         }
@@ -8411,7 +8436,7 @@ namespace TalkBackAutoTest
 
 
                 p.WaitForExit();
-                    
+
 
                 string[] lines = File.ReadAllLines(@path);
                 return lines;
@@ -8525,7 +8550,7 @@ namespace TalkBackAutoTest
                  StringSplitOptions.RemoveEmptyEntries
              );
 
-            foreach(string line in lines)
+            foreach (string line in lines)
             {
                 if (line.Trim() == screenName)
                 {
@@ -8547,7 +8572,7 @@ namespace TalkBackAutoTest
                         string screenName = item.SubItems[5].Text.ToString();
                         //TalkBackAutoTest.Properties.Settings.Default.txtWS = txtWS.Text;
                         //TalkBackAutoTest.Properties.Settings.Default.Save();                  
-                        if(!isInContent(content,screenName))
+                        if (!isInContent(content, screenName))
                         {
                             if (content == "")
                             {
@@ -8558,7 +8583,7 @@ namespace TalkBackAutoTest
                                 content += "\r\n" + screenName.Trim();
                             }
                         }
-                        
+
                     }
                     txtList_screen.Text = content;
                     TalkBackAutoTest.Properties.Settings.Default.blacklist_screen = content;
@@ -8648,7 +8673,7 @@ namespace TalkBackAutoTest
 
         private void SwapMode(int index)
         {
-            if (index == 1)
+            if (index == 1)//android
             {
                 if (!tabControl1.TabPages.Contains(tabPageAndrodiManual))
                 {
@@ -8693,9 +8718,117 @@ namespace TalkBackAutoTest
         private void pictureBox5_Click(object sender, EventArgs e)
         {
             MessageBox.Show("PO5 + Window Team ^^");
-        }
-        
+            //UIAppInfo x = PCManager.startUWPApp("SAMSUNGELECTRONICSCoLtd.SamsungNotes_wyx1vj98g3asy!App");
+            //updateListApponComboBox(x);
 
-        
+        }
+
+        private void updateListApponComboBox(UIAppInfo x =null)
+        {
+            try
+            {
+                cbPClistApp.DataSource = null;
+                cbPClistApp.Items.Clear();
+                List<UIAppInfo> listApp = PCManager.GetRunningUIApplications();
+                cbPClistApp.DataSource = listApp;
+                cbPClistApp.DisplayMember = "DisplayText"; // Hiển thị ProcessName - WindowTitle
+                cbPClistApp.ValueMember = "ProcessId";     // Giá trị thực là ProcessId
+
+                // Thêm sự kiện khi chọn item
+                cbPClistApp.SelectedIndexChanged += (sender1, e1) =>
+                {
+                    var selectedItem = cbPClistApp.SelectedItem as UIAppInfo;
+                    if (selectedItem != null)
+                    {
+                        printLog(string.Format("Đã chọn: {0}\nID: {1}",
+                            selectedItem.ProcessName,
+                            selectedItem.ProcessId));
+                    }
+                };
+
+                if (x != null)
+                {
+                    cbPClistApp.SelectedValue = x.ProcessId;
+                    cbPClistApp.Update();
+                }
+            }
+            catch (Exception ex)
+            {
+                printLog(ex.Message);
+            }
+
+        }
+
+
+        private void btngetPackagePC_Click(object sender, EventArgs e)
+        {
+            updateListApponComboBox();
+        }
+
+        private void btnCheckEnvironmentPC_Click(object sender, EventArgs e)
+        {
+            string rs = PCManager.checkPCEnvironemnet();
+            MessageBox.Show(rs);
+        }
+
+        private void rdPC_StressMode_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdPC_StressMode.Checked == true)
+            {
+                TalkBackAutoTest.Properties.Settings.Default.pcmodeTesting = 1;
+                TalkBackAutoTest.Properties.Settings.Default.Save();
+            }
+        }
+
+        private void rdPC_SemiMode_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdPC_SemiMode.Checked == true)
+            {
+                TalkBackAutoTest.Properties.Settings.Default.pcmodeTesting = 2;
+                TalkBackAutoTest.Properties.Settings.Default.Save();
+            }
+        }
+
+        private void rdPCNarrator_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdPCNarrator.Checked == true)
+            {
+                TalkBackAutoTest.Properties.Settings.Default.pcmethodouput = 1;
+                TalkBackAutoTest.Properties.Settings.Default.Save();
+            }
+        }
+
+        private void rdPCNVDA_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rdPCNVDA.Checked == true)
+            {
+                TalkBackAutoTest.Properties.Settings.Default.pcmethodouput = 2;
+                TalkBackAutoTest.Properties.Settings.Default.Save();
+            }
+        }
+
+
+        //PC
+        private int getTestingPID_PC()
+        {
+            int result = -1;
+
+            this.Invoke(new Action(() =>
+            {
+                var selectedItem = cbPClistApp.SelectedItem as UIAppInfo;
+                if (selectedItem != null)
+                {
+                    result  = selectedItem.ProcessId;
+                }
+                
+            }));
+            return result;
+ 
+        }
+
+        //END PC
+
+
+
     }
 }

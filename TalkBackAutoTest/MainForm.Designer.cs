@@ -32,8 +32,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.panel_left = new System.Windows.Forms.Panel();
             this.panelLeftBot = new System.Windows.Forms.Panel();
+            this.pictureBox5 = new System.Windows.Forms.PictureBox();
+            this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.label9 = new System.Windows.Forms.Label();
             this.panel_leftTop = new System.Windows.Forms.Panel();
+            this.btnRefresh = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.lbLang = new System.Windows.Forms.Label();
             this.lbBranch = new System.Windows.Forms.Label();
             this.lbType = new System.Windows.Forms.Label();
@@ -89,8 +93,12 @@
             this.bntBack = new System.Windows.Forms.Button();
             this.btnEsc = new System.Windows.Forms.Button();
             this.btnEnterKey = new System.Windows.Forms.Button();
+            this.btnDpadDown = new System.Windows.Forms.Button();
             this.btnTABKey = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
+            this.btnDpadLeft = new System.Windows.Forms.Button();
+            this.btnDpadRight = new System.Windows.Forms.Button();
+            this.btnDpadUp = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
@@ -124,6 +132,10 @@
             this.label12 = new System.Windows.Forms.Label();
             this.cbLanguage = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.rbActivityMode = new System.Windows.Forms.RadioButton();
+            this.rbManualMode = new System.Windows.Forms.RadioButton();
+            this.rbStressTestMode = new System.Windows.Forms.RadioButton();
             this.txtEventNumberMax1screen = new System.Windows.Forms.TextBox();
             this.cbDisableSysKey = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -132,47 +144,66 @@
             this.btnGetPackage = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.txtMaximumScreenShot = new System.Windows.Forms.TextBox();
+            this.rdByScreenshot = new System.Windows.Forms.RadioButton();
             this.label10 = new System.Windows.Forms.Label();
+            this.rdByLog = new System.Windows.Forms.RadioButton();
             this.txtPkg = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.txtEventNumberMaxAll = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.tabPageWindowApp = new System.Windows.Forms.TabPage();
+            this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.groupBox13 = new System.Windows.Forms.GroupBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.checkBox5 = new System.Windows.Forms.CheckBox();
+            this.checkBox6 = new System.Windows.Forms.CheckBox();
+            this.checkBox8 = new System.Windows.Forms.CheckBox();
+            this.tabControl3 = new System.Windows.Forms.TabControl();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.textBox5 = new System.Windows.Forms.TextBox();
+            this.tabPage9 = new System.Windows.Forms.TabPage();
+            this.textBox6 = new System.Windows.Forms.TextBox();
+            this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.btnCheckEnvironmentPC = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.rdPC_SemiMode = new System.Windows.Forms.RadioButton();
+            this.rdPC_StressMode = new System.Windows.Forms.RadioButton();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.btngetPackagePC = new System.Windows.Forms.Button();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.rdPCNVDA = new System.Windows.Forms.RadioButton();
+            this.rdPCNarrator = new System.Windows.Forms.RadioButton();
+            this.label16 = new System.Windows.Forms.Label();
+            this.cbLangguagePC = new System.Windows.Forms.ComboBox();
+            this.cbPClistApp = new System.Windows.Forms.ComboBox();
+            this.label15 = new System.Windows.Forms.Label();
             this.panel_mid_bot = new System.Windows.Forms.Panel();
             this.panel_log = new System.Windows.Forms.Panel();
             this.logs = new System.Windows.Forms.RichTextBox();
             this.panel_bot_header = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
             this.panel_top = new System.Windows.Forms.Panel();
-            this.rdByScreenshot = new System.Windows.Forms.RadioButton();
-            this.rdByLog = new System.Windows.Forms.RadioButton();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.rbWindowMode = new System.Windows.Forms.RadioButton();
+            this.rbAndroidMode = new System.Windows.Forms.RadioButton();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.btnGuide = new System.Windows.Forms.Button();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.btnOpenWs = new System.Windows.Forms.Button();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.rbActivityMode = new System.Windows.Forms.RadioButton();
-            this.rbManualMode = new System.Windows.Forms.RadioButton();
-            this.rbStressTestMode = new System.Windows.Forms.RadioButton();
             this.btnExport = new System.Windows.Forms.Button();
             this.btnRun = new System.Windows.Forms.Button();
             this.btnChooseWS = new System.Windows.Forms.Button();
             this.txtWS = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.rbAndroidMode = new System.Windows.Forms.RadioButton();
-            this.rbWindowMode = new System.Windows.Forms.RadioButton();
-            this.tabPageWindowApp = new System.Windows.Forms.TabPage();
-            this.btnDpadDown = new System.Windows.Forms.Button();
-            this.btnDpadLeft = new System.Windows.Forms.Button();
-            this.btnDpadRight = new System.Windows.Forms.Button();
-            this.btnDpadUp = new System.Windows.Forms.Button();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.pictureBox5 = new System.Windows.Forms.PictureBox();
-            this.pictureBox4 = new System.Windows.Forms.PictureBox();
-            this.btnRefresh = new System.Windows.Forms.Button();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.generatePLMFormatToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.generateJiraFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -181,7 +212,10 @@
             this.viewScreenRecordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel_left.SuspendLayout();
             this.panelLeftBot.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.panel_leftTop.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel_main.SuspendLayout();
             this.panelMid_mid.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -202,19 +236,27 @@
             this.tabPage6.SuspendLayout();
             this.tabPage8.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            this.tabPageWindowApp.SuspendLayout();
+            this.groupBox12.SuspendLayout();
+            this.groupBox13.SuspendLayout();
+            this.tabControl3.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.tabPage7.SuspendLayout();
+            this.tabPage9.SuspendLayout();
+            this.groupBox10.SuspendLayout();
+            this.groupBox11.SuspendLayout();
+            this.groupBox8.SuspendLayout();
+            this.groupBox9.SuspendLayout();
             this.panel_mid_bot.SuspendLayout();
             this.panel_log.SuspendLayout();
             this.panel_bot_header.SuspendLayout();
             this.panel_top.SuspendLayout();
-            this.groupBox4.SuspendLayout();
             this.groupBox7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.contextMenuStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -249,6 +291,28 @@
             this.panelLeftBot.Size = new System.Drawing.Size(262, 185);
             this.panelLeftBot.TabIndex = 2;
             // 
+            // pictureBox5
+            // 
+            this.pictureBox5.Image = global::TalkBackAutoTest.Properties.Resources.tb1;
+            this.pictureBox5.Location = new System.Drawing.Point(136, 55);
+            this.pictureBox5.Name = "pictureBox5";
+            this.pictureBox5.Size = new System.Drawing.Size(99, 107);
+            this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox5.TabIndex = 1;
+            this.pictureBox5.TabStop = false;
+            this.pictureBox5.Click += new System.EventHandler(this.pictureBox5_Click);
+            // 
+            // pictureBox4
+            // 
+            this.pictureBox4.Image = global::TalkBackAutoTest.Properties.Resources.a2;
+            this.pictureBox4.Location = new System.Drawing.Point(16, 55);
+            this.pictureBox4.Name = "pictureBox4";
+            this.pictureBox4.Size = new System.Drawing.Size(105, 107);
+            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox4.TabIndex = 1;
+            this.pictureBox4.TabStop = false;
+            this.pictureBox4.Click += new System.EventHandler(this.pictureBox4_Click);
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -279,63 +343,89 @@
             this.panel_leftTop.TabIndex = 0;
             this.panel_leftTop.Paint += new System.Windows.Forms.PaintEventHandler(this.panel_leftTop_Paint);
             // 
+            // btnRefresh
+            // 
+            this.btnRefresh.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.rf;
+            this.btnRefresh.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnRefresh.FlatAppearance.BorderSize = 0;
+            this.btnRefresh.Location = new System.Drawing.Point(149, 21);
+            this.btnRefresh.Name = "btnRefresh";
+            this.btnRefresh.Size = new System.Drawing.Size(24, 24);
+            this.btnRefresh.TabIndex = 2;
+            this.toolTip1.SetToolTip(this.btnRefresh, "Click here to connect device");
+            this.btnRefresh.UseVisualStyleBackColor = true;
+            this.btnRefresh.VisibleChanged += new System.EventHandler(this.btnRefresh_VisibleChanged);
+            this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::TalkBackAutoTest.Properties.Resources.talbackIcon;
+            this.pictureBox1.Location = new System.Drawing.Point(226, 228);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(30, 29);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Visible = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
             // lbLang
             // 
             this.lbLang.AutoSize = true;
-            this.lbLang.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbLang.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbLang.Location = new System.Drawing.Point(12, 228);
             this.lbLang.Name = "lbLang";
-            this.lbLang.Size = new System.Drawing.Size(120, 16);
+            this.lbLang.Size = new System.Drawing.Size(109, 15);
             this.lbLang.TabIndex = 1;
             this.lbLang.Text = "System Language:";
             // 
             // lbBranch
             // 
             this.lbBranch.AutoSize = true;
-            this.lbBranch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbBranch.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbBranch.Location = new System.Drawing.Point(12, 200);
             this.lbBranch.Name = "lbBranch";
-            this.lbBranch.Size = new System.Drawing.Size(53, 16);
+            this.lbBranch.Size = new System.Drawing.Size(49, 15);
             this.lbBranch.TabIndex = 1;
             this.lbBranch.Text = "Branch:";
             // 
             // lbType
             // 
             this.lbType.AutoSize = true;
-            this.lbType.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbType.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbType.Location = new System.Drawing.Point(11, 168);
             this.lbType.Name = "lbType";
-            this.lbType.Size = new System.Drawing.Size(43, 16);
+            this.lbType.Size = new System.Drawing.Size(36, 15);
             this.lbType.TabIndex = 1;
             this.lbType.Text = "Type:";
             // 
             // lbSerial
             // 
             this.lbSerial.AutoSize = true;
-            this.lbSerial.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbSerial.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbSerial.Location = new System.Drawing.Point(13, 136);
             this.lbSerial.Name = "lbSerial";
-            this.lbSerial.Size = new System.Drawing.Size(97, 16);
+            this.lbSerial.Size = new System.Drawing.Size(90, 15);
             this.lbSerial.TabIndex = 1;
             this.lbSerial.Text = "Serial Number:";
             // 
             // lbBinary
             // 
             this.lbBinary.AutoSize = true;
-            this.lbBinary.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbBinary.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbBinary.Location = new System.Drawing.Point(13, 101);
             this.lbBinary.Name = "lbBinary";
-            this.lbBinary.Size = new System.Drawing.Size(89, 16);
+            this.lbBinary.Size = new System.Drawing.Size(81, 15);
             this.lbBinary.TabIndex = 1;
             this.lbBinary.Text = "Binary Name:";
             // 
             // lbModel
             // 
             this.lbModel.AutoSize = true;
-            this.lbModel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbModel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbModel.Location = new System.Drawing.Point(13, 65);
             this.lbModel.Name = "lbModel";
-            this.lbModel.Size = new System.Drawing.Size(89, 16);
+            this.lbModel.Size = new System.Drawing.Size(82, 15);
             this.lbModel.TabIndex = 1;
             this.lbModel.Text = "Model Name:";
             // 
@@ -798,6 +888,18 @@
             this.btnEnterKey.UseVisualStyleBackColor = false;
             this.btnEnterKey.Click += new System.EventHandler(this.btnEnterKey_Click);
             // 
+            // btnDpadDown
+            // 
+            this.btnDpadDown.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.down;
+            this.btnDpadDown.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnDpadDown.FlatAppearance.BorderSize = 0;
+            this.btnDpadDown.Location = new System.Drawing.Point(434, 52);
+            this.btnDpadDown.Name = "btnDpadDown";
+            this.btnDpadDown.Size = new System.Drawing.Size(58, 54);
+            this.btnDpadDown.TabIndex = 3;
+            this.toolTip1.SetToolTip(this.btnDpadDown, "DPAD DOWN");
+            this.btnDpadDown.UseVisualStyleBackColor = true;
+            // 
             // btnTABKey
             // 
             this.btnTABKey.BackColor = System.Drawing.Color.MediumSeaGreen;
@@ -822,6 +924,42 @@
             this.button4.Text = "TB ON";
             this.button4.UseVisualStyleBackColor = false;
             this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // btnDpadLeft
+            // 
+            this.btnDpadLeft.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.left;
+            this.btnDpadLeft.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnDpadLeft.FlatAppearance.BorderSize = 0;
+            this.btnDpadLeft.Location = new System.Drawing.Point(379, 52);
+            this.btnDpadLeft.Name = "btnDpadLeft";
+            this.btnDpadLeft.Size = new System.Drawing.Size(55, 53);
+            this.btnDpadLeft.TabIndex = 4;
+            this.toolTip1.SetToolTip(this.btnDpadLeft, "DPAD LEFT");
+            this.btnDpadLeft.UseVisualStyleBackColor = true;
+            // 
+            // btnDpadRight
+            // 
+            this.btnDpadRight.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.right;
+            this.btnDpadRight.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnDpadRight.FlatAppearance.BorderSize = 0;
+            this.btnDpadRight.Location = new System.Drawing.Point(489, 52);
+            this.btnDpadRight.Name = "btnDpadRight";
+            this.btnDpadRight.Size = new System.Drawing.Size(59, 53);
+            this.btnDpadRight.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.btnDpadRight, "DPAD RIGHT");
+            this.btnDpadRight.UseVisualStyleBackColor = true;
+            // 
+            // btnDpadUp
+            // 
+            this.btnDpadUp.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.up;
+            this.btnDpadUp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnDpadUp.FlatAppearance.BorderSize = 0;
+            this.btnDpadUp.Location = new System.Drawing.Point(434, 0);
+            this.btnDpadUp.Name = "btnDpadUp";
+            this.btnDpadUp.Size = new System.Drawing.Size(58, 55);
+            this.btnDpadUp.TabIndex = 6;
+            this.toolTip1.SetToolTip(this.btnDpadUp, "DPAD UP");
+            this.btnDpadUp.UseVisualStyleBackColor = true;
             // 
             // button1
             // 
@@ -1221,6 +1359,56 @@
             this.label5.TabIndex = 1;
             this.label5.Text = "Language";
             // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.rbActivityMode);
+            this.groupBox4.Controls.Add(this.rbManualMode);
+            this.groupBox4.Controls.Add(this.rbStressTestMode);
+            this.groupBox4.Location = new System.Drawing.Point(540, 15);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(308, 47);
+            this.groupBox4.TabIndex = 2;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Testing Mode";
+            // 
+            // rbActivityMode
+            // 
+            this.rbActivityMode.AutoSize = true;
+            this.rbActivityMode.Location = new System.Drawing.Point(215, 22);
+            this.rbActivityMode.Name = "rbActivityMode";
+            this.rbActivityMode.Size = new System.Drawing.Size(88, 17);
+            this.rbActivityMode.TabIndex = 1;
+            this.rbActivityMode.TabStop = true;
+            this.rbActivityMode.Text = "Activity mode";
+            this.toolTip1.SetToolTip(this.rbActivityMode, "Please check it again before registering issue");
+            this.rbActivityMode.UseVisualStyleBackColor = true;
+            this.rbActivityMode.CheckedChanged += new System.EventHandler(this.rbActivityMode_CheckedChanged);
+            // 
+            // rbManualMode
+            // 
+            this.rbManualMode.AutoSize = true;
+            this.rbManualMode.Location = new System.Drawing.Point(111, 22);
+            this.rbManualMode.Name = "rbManualMode";
+            this.rbManualMode.Size = new System.Drawing.Size(103, 17);
+            this.rbManualMode.TabIndex = 0;
+            this.rbManualMode.Text = "Semi-Auto Mode";
+            this.toolTip1.SetToolTip(this.rbManualMode, "Go to any screen you want to check by manually");
+            this.rbManualMode.UseVisualStyleBackColor = true;
+            this.rbManualMode.CheckedChanged += new System.EventHandler(this.rbManualMode_CheckedChanged);
+            // 
+            // rbStressTestMode
+            // 
+            this.rbStressTestMode.AutoSize = true;
+            this.rbStressTestMode.Checked = true;
+            this.rbStressTestMode.Location = new System.Drawing.Point(5, 22);
+            this.rbStressTestMode.Name = "rbStressTestMode";
+            this.rbStressTestMode.Size = new System.Drawing.Size(105, 17);
+            this.rbStressTestMode.TabIndex = 0;
+            this.rbStressTestMode.TabStop = true;
+            this.rbStressTestMode.Text = "StressTest Mode";
+            this.rbStressTestMode.UseVisualStyleBackColor = true;
+            this.rbStressTestMode.CheckedChanged += new System.EventHandler(this.rbStressTestMode_CheckedChanged);
+            // 
             // txtEventNumberMax1screen
             // 
             this.txtEventNumberMax1screen.Location = new System.Drawing.Point(738, 342);
@@ -1310,6 +1498,18 @@
             this.txtMaximumScreenShot.Text = "5";
             this.txtMaximumScreenShot.TextChanged += new System.EventHandler(this.txtMaximumScreenShot_TextChanged);
             // 
+            // rdByScreenshot
+            // 
+            this.rdByScreenshot.AutoSize = true;
+            this.rdByScreenshot.Checked = true;
+            this.rdByScreenshot.Location = new System.Drawing.Point(160, 23);
+            this.rdByScreenshot.Name = "rdByScreenshot";
+            this.rdByScreenshot.Size = new System.Drawing.Size(96, 17);
+            this.rdByScreenshot.TabIndex = 0;
+            this.rdByScreenshot.TabStop = true;
+            this.rdByScreenshot.Text = "By ScreenShot";
+            this.rdByScreenshot.UseVisualStyleBackColor = true;
+            // 
             // label10
             // 
             this.label10.AutoSize = true;
@@ -1319,6 +1519,16 @@
             this.label10.TabIndex = 3;
             this.label10.Text = "Screenshots";
             this.label10.Click += new System.EventHandler(this.label10_Click);
+            // 
+            // rdByLog
+            // 
+            this.rdByLog.AutoSize = true;
+            this.rdByLog.Location = new System.Drawing.Point(9, 24);
+            this.rdByLog.Name = "rdByLog";
+            this.rdByLog.Size = new System.Drawing.Size(143, 17);
+            this.rdByLog.TabIndex = 0;
+            this.rdByLog.Text = "By Log (Eng/userDebug)";
+            this.rdByLog.UseVisualStyleBackColor = true;
             // 
             // txtPkg
             // 
@@ -1370,6 +1580,373 @@
             this.label6.Text = "Maximum Number of objects/ TestRun";
             this.label6.Visible = false;
             // 
+            // tabPageWindowApp
+            // 
+            this.tabPageWindowApp.Controls.Add(this.groupBox12);
+            this.tabPageWindowApp.Controls.Add(this.groupBox10);
+            this.tabPageWindowApp.Controls.Add(this.groupBox8);
+            this.tabPageWindowApp.Location = new System.Drawing.Point(4, 22);
+            this.tabPageWindowApp.Name = "tabPageWindowApp";
+            this.tabPageWindowApp.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageWindowApp.Size = new System.Drawing.Size(933, 340);
+            this.tabPageWindowApp.TabIndex = 3;
+            this.tabPageWindowApp.Text = "WindowApp Setting";
+            this.tabPageWindowApp.UseVisualStyleBackColor = true;
+            // 
+            // groupBox12
+            // 
+            this.groupBox12.Controls.Add(this.groupBox13);
+            this.groupBox12.Controls.Add(this.tabControl3);
+            this.groupBox12.Location = new System.Drawing.Point(6, 163);
+            this.groupBox12.Name = "groupBox12";
+            this.groupBox12.Size = new System.Drawing.Size(913, 171);
+            this.groupBox12.TabIndex = 3;
+            this.groupBox12.TabStop = false;
+            this.groupBox12.Text = "BlackList Text (Line by Line, if talkbacktext inclunes one line -> Ignore this ca" +
+    "se)";
+            // 
+            // groupBox13
+            // 
+            this.groupBox13.Controls.Add(this.checkBox1);
+            this.groupBox13.Controls.Add(this.checkBox2);
+            this.groupBox13.Controls.Add(this.checkBox3);
+            this.groupBox13.Controls.Add(this.checkBox4);
+            this.groupBox13.Controls.Add(this.checkBox5);
+            this.groupBox13.Controls.Add(this.checkBox6);
+            this.groupBox13.Controls.Add(this.checkBox8);
+            this.groupBox13.Location = new System.Drawing.Point(534, 42);
+            this.groupBox13.Name = "groupBox13";
+            this.groupBox13.Size = new System.Drawing.Size(373, 125);
+            this.groupBox13.TabIndex = 1;
+            this.groupBox13.TabStop = false;
+            this.groupBox13.Text = "Setup Kind of Issue For Testing";
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(212, 99);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(162, 17);
+            this.checkBox1.TabIndex = 0;
+            this.checkBox1.Text = "NO_FOCUSABLE_HEADER";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(6, 99);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(203, 17);
+            this.checkBox2.TabIndex = 0;
+            this.checkBox2.Text = "NO_CHANGE_FOCUS_AFTER_TAB";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Checked = true;
+            this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox3.Enabled = false;
+            this.checkBox3.Location = new System.Drawing.Point(109, 61);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(177, 17);
+            this.checkBox3.TabIndex = 0;
+            this.checkBox3.Text = "REPEAT_PREVIOUS_OBJECT";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Checked = true;
+            this.checkBox4.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox4.Enabled = false;
+            this.checkBox4.Location = new System.Drawing.Point(6, 61);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(84, 17);
+            this.checkBox4.TabIndex = 0;
+            this.checkBox4.Text = "DIFF_LANG";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            // 
+            // checkBox5
+            // 
+            this.checkBox5.AutoSize = true;
+            this.checkBox5.Checked = true;
+            this.checkBox5.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox5.Enabled = false;
+            this.checkBox5.Location = new System.Drawing.Point(233, 19);
+            this.checkBox5.Name = "checkBox5";
+            this.checkBox5.Size = new System.Drawing.Size(90, 17);
+            this.checkBox5.TabIndex = 0;
+            this.checkBox5.Text = "DUP_WORD";
+            this.checkBox5.UseVisualStyleBackColor = true;
+            // 
+            // checkBox6
+            // 
+            this.checkBox6.AutoSize = true;
+            this.checkBox6.Checked = true;
+            this.checkBox6.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox6.Enabled = false;
+            this.checkBox6.Location = new System.Drawing.Point(109, 20);
+            this.checkBox6.Name = "checkBox6";
+            this.checkBox6.Size = new System.Drawing.Size(93, 17);
+            this.checkBox6.TabIndex = 0;
+            this.checkBox6.Text = "NO_OUTPUT";
+            this.checkBox6.UseVisualStyleBackColor = true;
+            // 
+            // checkBox8
+            // 
+            this.checkBox8.AutoSize = true;
+            this.checkBox8.Checked = true;
+            this.checkBox8.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox8.Enabled = false;
+            this.checkBox8.Location = new System.Drawing.Point(6, 20);
+            this.checkBox8.Name = "checkBox8";
+            this.checkBox8.Size = new System.Drawing.Size(61, 17);
+            this.checkBox8.TabIndex = 0;
+            this.checkBox8.Text = "BLANK";
+            this.checkBox8.UseVisualStyleBackColor = true;
+            // 
+            // tabControl3
+            // 
+            this.tabControl3.Controls.Add(this.tabPage2);
+            this.tabControl3.Controls.Add(this.tabPage7);
+            this.tabControl3.Controls.Add(this.tabPage9);
+            this.tabControl3.Location = new System.Drawing.Point(7, 20);
+            this.tabControl3.Name = "tabControl3";
+            this.tabControl3.SelectedIndex = 0;
+            this.tabControl3.Size = new System.Drawing.Size(521, 151);
+            this.tabControl3.TabIndex = 0;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.textBox4);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(513, 125);
+            this.tabPage2.TabIndex = 0;
+            this.tabPage2.Text = "Language (Word)";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // textBox4
+            // 
+            this.textBox4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox4.Location = new System.Drawing.Point(3, 3);
+            this.textBox4.Multiline = true;
+            this.textBox4.Name = "textBox4";
+            this.textBox4.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox4.Size = new System.Drawing.Size(507, 119);
+            this.textBox4.TabIndex = 2;
+            // 
+            // tabPage7
+            // 
+            this.tabPage7.Controls.Add(this.textBox5);
+            this.tabPage7.Location = new System.Drawing.Point(4, 22);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage7.Size = new System.Drawing.Size(513, 125);
+            this.tabPage7.TabIndex = 1;
+            this.tabPage7.Text = "Repeat Text (Word)";
+            this.tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // textBox5
+            // 
+            this.textBox5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox5.Location = new System.Drawing.Point(3, 3);
+            this.textBox5.Multiline = true;
+            this.textBox5.Name = "textBox5";
+            this.textBox5.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox5.Size = new System.Drawing.Size(507, 119);
+            this.textBox5.TabIndex = 1;
+            // 
+            // tabPage9
+            // 
+            this.tabPage9.Controls.Add(this.textBox6);
+            this.tabPage9.Location = new System.Drawing.Point(4, 22);
+            this.tabPage9.Name = "tabPage9";
+            this.tabPage9.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage9.Size = new System.Drawing.Size(513, 125);
+            this.tabPage9.TabIndex = 2;
+            this.tabPage9.Text = "Dup Word (Sentence)";
+            this.tabPage9.UseVisualStyleBackColor = true;
+            // 
+            // textBox6
+            // 
+            this.textBox6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox6.Location = new System.Drawing.Point(3, 3);
+            this.textBox6.Multiline = true;
+            this.textBox6.Name = "textBox6";
+            this.textBox6.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox6.Size = new System.Drawing.Size(507, 119);
+            this.textBox6.TabIndex = 1;
+            // 
+            // groupBox10
+            // 
+            this.groupBox10.Controls.Add(this.btnCheckEnvironmentPC);
+            this.groupBox10.Controls.Add(this.groupBox9);
+            this.groupBox10.Controls.Add(this.label4);
+            this.groupBox10.Controls.Add(this.groupBox11);
+            this.groupBox10.Location = new System.Drawing.Point(6, 84);
+            this.groupBox10.Name = "groupBox10";
+            this.groupBox10.Size = new System.Drawing.Size(913, 68);
+            this.groupBox10.TabIndex = 2;
+            this.groupBox10.TabStop = false;
+            this.groupBox10.Text = "Addional Tools";
+            // 
+            // btnCheckEnvironmentPC
+            // 
+            this.btnCheckEnvironmentPC.Location = new System.Drawing.Point(10, 33);
+            this.btnCheckEnvironmentPC.Name = "btnCheckEnvironmentPC";
+            this.btnCheckEnvironmentPC.Size = new System.Drawing.Size(373, 23);
+            this.btnCheckEnvironmentPC.TabIndex = 6;
+            this.btnCheckEnvironmentPC.Text = "Check and Install Environment";
+            this.btnCheckEnvironmentPC.UseVisualStyleBackColor = true;
+            this.btnCheckEnvironmentPC.Click += new System.EventHandler(this.btnCheckEnvironmentPC_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(11, 18);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(179, 13);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "Python Environemnt (OCR/OpenCV)";
+            // 
+            // groupBox11
+            // 
+            this.groupBox11.Controls.Add(this.rdPC_SemiMode);
+            this.groupBox11.Controls.Add(this.rdPC_StressMode);
+            this.groupBox11.Location = new System.Drawing.Point(398, 15);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Size = new System.Drawing.Size(239, 47);
+            this.groupBox11.TabIndex = 2;
+            this.groupBox11.TabStop = false;
+            this.groupBox11.Text = "Testing Mode";
+            // 
+            // rdPC_SemiMode
+            // 
+            this.rdPC_SemiMode.AutoSize = true;
+            this.rdPC_SemiMode.Location = new System.Drawing.Point(111, 22);
+            this.rdPC_SemiMode.Name = "rdPC_SemiMode";
+            this.rdPC_SemiMode.Size = new System.Drawing.Size(103, 17);
+            this.rdPC_SemiMode.TabIndex = 0;
+            this.rdPC_SemiMode.Text = "Semi-Auto Mode";
+            this.toolTip1.SetToolTip(this.rdPC_SemiMode, "Go to any screen you want to check by manually");
+            this.rdPC_SemiMode.UseVisualStyleBackColor = true;
+            this.rdPC_SemiMode.CheckedChanged += new System.EventHandler(this.rdPC_SemiMode_CheckedChanged);
+            // 
+            // rdPC_StressMode
+            // 
+            this.rdPC_StressMode.AutoSize = true;
+            this.rdPC_StressMode.Checked = true;
+            this.rdPC_StressMode.Location = new System.Drawing.Point(5, 22);
+            this.rdPC_StressMode.Name = "rdPC_StressMode";
+            this.rdPC_StressMode.Size = new System.Drawing.Size(105, 17);
+            this.rdPC_StressMode.TabIndex = 0;
+            this.rdPC_StressMode.TabStop = true;
+            this.rdPC_StressMode.Text = "StressTest Mode";
+            this.rdPC_StressMode.UseVisualStyleBackColor = true;
+            this.rdPC_StressMode.CheckedChanged += new System.EventHandler(this.rdPC_StressMode_CheckedChanged);
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.btngetPackagePC);
+            this.groupBox8.Controls.Add(this.label16);
+            this.groupBox8.Controls.Add(this.cbLangguagePC);
+            this.groupBox8.Controls.Add(this.cbPClistApp);
+            this.groupBox8.Controls.Add(this.label15);
+            this.groupBox8.Location = new System.Drawing.Point(6, 6);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(913, 72);
+            this.groupBox8.TabIndex = 1;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Precondition Setting";
+            // 
+            // btngetPackagePC
+            // 
+            this.btngetPackagePC.Location = new System.Drawing.Point(630, 35);
+            this.btngetPackagePC.Name = "btngetPackagePC";
+            this.btngetPackagePC.Size = new System.Drawing.Size(131, 23);
+            this.btngetPackagePC.TabIndex = 7;
+            this.btngetPackagePC.Text = "Refresh Apps List";
+            this.btngetPackagePC.UseVisualStyleBackColor = true;
+            this.btngetPackagePC.Click += new System.EventHandler(this.btngetPackagePC_Click);
+            // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.rdPCNVDA);
+            this.groupBox9.Controls.Add(this.rdPCNarrator);
+            this.groupBox9.Location = new System.Drawing.Point(651, 16);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(256, 47);
+            this.groupBox9.TabIndex = 6;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "Method Ouput";
+            // 
+            // rdPCNVDA
+            // 
+            this.rdPCNVDA.AutoSize = true;
+            this.rdPCNVDA.Checked = true;
+            this.rdPCNVDA.Location = new System.Drawing.Point(104, 25);
+            this.rdPCNVDA.Name = "rdPCNVDA";
+            this.rdPCNVDA.Size = new System.Drawing.Size(70, 17);
+            this.rdPCNVDA.TabIndex = 0;
+            this.rdPCNVDA.TabStop = true;
+            this.rdPCNVDA.Text = "By NVDA";
+            this.rdPCNVDA.UseVisualStyleBackColor = true;
+            this.rdPCNVDA.CheckedChanged += new System.EventHandler(this.rdPCNVDA_CheckedChanged);
+            // 
+            // rdPCNarrator
+            // 
+            this.rdPCNarrator.AutoSize = true;
+            this.rdPCNarrator.Location = new System.Drawing.Point(9, 24);
+            this.rdPCNarrator.Name = "rdPCNarrator";
+            this.rdPCNarrator.Size = new System.Drawing.Size(78, 17);
+            this.rdPCNarrator.TabIndex = 0;
+            this.rdPCNarrator.Text = "By Narattor";
+            this.rdPCNarrator.UseVisualStyleBackColor = true;
+            this.rdPCNarrator.CheckedChanged += new System.EventHandler(this.rdPCNarrator_CheckedChanged);
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(775, 16);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(115, 13);
+            this.label16.TabIndex = 1;
+            this.label16.Text = "App Language Testing";
+            // 
+            // cbLangguagePC
+            // 
+            this.cbLangguagePC.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbLangguagePC.FormattingEnabled = true;
+            this.cbLangguagePC.Items.AddRange(new object[] {
+            "en-US",
+            "vi-VN",
+            "ko-KR"});
+            this.cbLangguagePC.Location = new System.Drawing.Point(778, 37);
+            this.cbLangguagePC.Name = "cbLangguagePC";
+            this.cbLangguagePC.Size = new System.Drawing.Size(126, 21);
+            this.cbLangguagePC.TabIndex = 4;
+            // 
+            // cbPClistApp
+            // 
+            this.cbPClistApp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbPClistApp.FormattingEnabled = true;
+            this.cbPClistApp.Location = new System.Drawing.Point(11, 37);
+            this.cbPClistApp.Name = "cbPClistApp";
+            this.cbPClistApp.Size = new System.Drawing.Size(613, 21);
+            this.cbPClistApp.TabIndex = 4;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(10, 16);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(113, 13);
+            this.label15.TabIndex = 1;
+            this.label15.Text = "App Name For Testing";
+            // 
             // panel_mid_bot
             // 
             this.panel_mid_bot.Controls.Add(this.panel_log);
@@ -1410,7 +1987,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 6);
+            this.label2.Location = new System.Drawing.Point(3, 6);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(39, 13);
             this.label2.TabIndex = 0;
@@ -1436,27 +2013,64 @@
             this.panel_top.Size = new System.Drawing.Size(941, 128);
             this.panel_top.TabIndex = 0;
             // 
-            // rdByScreenshot
+            // groupBox7
             // 
-            this.rdByScreenshot.AutoSize = true;
-            this.rdByScreenshot.Checked = true;
-            this.rdByScreenshot.Location = new System.Drawing.Point(160, 23);
-            this.rdByScreenshot.Name = "rdByScreenshot";
-            this.rdByScreenshot.Size = new System.Drawing.Size(96, 17);
-            this.rdByScreenshot.TabIndex = 0;
-            this.rdByScreenshot.TabStop = true;
-            this.rdByScreenshot.Text = "By ScreenShot";
-            this.rdByScreenshot.UseVisualStyleBackColor = true;
+            this.groupBox7.Controls.Add(this.rbWindowMode);
+            this.groupBox7.Controls.Add(this.rbAndroidMode);
+            this.groupBox7.Location = new System.Drawing.Point(11, 37);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(507, 51);
+            this.groupBox7.TabIndex = 2;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Environement Testing";
             // 
-            // rdByLog
+            // rbWindowMode
             // 
-            this.rdByLog.AutoSize = true;
-            this.rdByLog.Location = new System.Drawing.Point(9, 24);
-            this.rdByLog.Name = "rdByLog";
-            this.rdByLog.Size = new System.Drawing.Size(143, 17);
-            this.rdByLog.TabIndex = 0;
-            this.rdByLog.Text = "By Log (Eng/userDebug)";
-            this.rdByLog.UseVisualStyleBackColor = true;
+            this.rbWindowMode.AutoSize = true;
+            this.rbWindowMode.Location = new System.Drawing.Point(176, 20);
+            this.rbWindowMode.Name = "rbWindowMode";
+            this.rbWindowMode.Size = new System.Drawing.Size(157, 17);
+            this.rbWindowMode.TabIndex = 3;
+            this.rbWindowMode.Text = "Window Application Testing";
+            this.rbWindowMode.UseVisualStyleBackColor = true;
+            this.rbWindowMode.CheckedChanged += new System.EventHandler(this.rbWindowMode_CheckedChanged);
+            // 
+            // rbAndroidMode
+            // 
+            this.rbAndroidMode.AutoSize = true;
+            this.rbAndroidMode.Checked = true;
+            this.rbAndroidMode.Location = new System.Drawing.Point(15, 20);
+            this.rbAndroidMode.Name = "rbAndroidMode";
+            this.rbAndroidMode.Size = new System.Drawing.Size(129, 17);
+            this.rbAndroidMode.TabIndex = 3;
+            this.rbAndroidMode.TabStop = true;
+            this.rbAndroidMode.Text = "Android Mode Testing";
+            this.rbAndroidMode.UseVisualStyleBackColor = true;
+            this.rbAndroidMode.CheckedChanged += new System.EventHandler(this.rbAndroidMode_CheckedChanged);
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox3.Image = global::TalkBackAutoTest.Properties.Resources.icons8_microsoft_excel_48;
+            this.pictureBox3.Location = new System.Drawing.Point(679, 52);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(25, 27);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox3.TabIndex = 7;
+            this.pictureBox3.TabStop = false;
+            this.pictureBox3.Click += new System.EventHandler(this.btnExport_Click);
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox2.Image = global::TalkBackAutoTest.Properties.Resources.device_connect;
+            this.pictureBox2.Location = new System.Drawing.Point(804, 52);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(25, 27);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox2.TabIndex = 7;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.Click += new System.EventHandler(this.btnGuide_Click);
             // 
             // btnGuide
             // 
@@ -1498,56 +2112,6 @@
             this.btnOpenWs.Text = "Open Workspace";
             this.btnOpenWs.UseVisualStyleBackColor = true;
             this.btnOpenWs.Click += new System.EventHandler(this.btnOpenWs_Click);
-            // 
-            // groupBox4
-            // 
-            this.groupBox4.Controls.Add(this.rbActivityMode);
-            this.groupBox4.Controls.Add(this.rbManualMode);
-            this.groupBox4.Controls.Add(this.rbStressTestMode);
-            this.groupBox4.Location = new System.Drawing.Point(540, 15);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(308, 47);
-            this.groupBox4.TabIndex = 2;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Testing Mode";
-            // 
-            // rbActivityMode
-            // 
-            this.rbActivityMode.AutoSize = true;
-            this.rbActivityMode.Location = new System.Drawing.Point(215, 22);
-            this.rbActivityMode.Name = "rbActivityMode";
-            this.rbActivityMode.Size = new System.Drawing.Size(88, 17);
-            this.rbActivityMode.TabIndex = 1;
-            this.rbActivityMode.TabStop = true;
-            this.rbActivityMode.Text = "Activity mode";
-            this.toolTip1.SetToolTip(this.rbActivityMode, "Please check it again before registering issue");
-            this.rbActivityMode.UseVisualStyleBackColor = true;
-            this.rbActivityMode.CheckedChanged += new System.EventHandler(this.rbActivityMode_CheckedChanged);
-            // 
-            // rbManualMode
-            // 
-            this.rbManualMode.AutoSize = true;
-            this.rbManualMode.Location = new System.Drawing.Point(111, 22);
-            this.rbManualMode.Name = "rbManualMode";
-            this.rbManualMode.Size = new System.Drawing.Size(103, 17);
-            this.rbManualMode.TabIndex = 0;
-            this.rbManualMode.Text = "Semi-Auto Mode";
-            this.toolTip1.SetToolTip(this.rbManualMode, "Go to any screen you want to check by manually");
-            this.rbManualMode.UseVisualStyleBackColor = true;
-            this.rbManualMode.CheckedChanged += new System.EventHandler(this.rbManualMode_CheckedChanged);
-            // 
-            // rbStressTestMode
-            // 
-            this.rbStressTestMode.AutoSize = true;
-            this.rbStressTestMode.Checked = true;
-            this.rbStressTestMode.Location = new System.Drawing.Point(5, 22);
-            this.rbStressTestMode.Name = "rbStressTestMode";
-            this.rbStressTestMode.Size = new System.Drawing.Size(105, 17);
-            this.rbStressTestMode.TabIndex = 0;
-            this.rbStressTestMode.TabStop = true;
-            this.rbStressTestMode.Text = "StressTest Mode";
-            this.rbStressTestMode.UseVisualStyleBackColor = true;
-            this.rbStressTestMode.CheckedChanged += new System.EventHandler(this.rbStressTestMode_CheckedChanged);
             // 
             // btnExport
             // 
@@ -1591,171 +2155,6 @@
             this.txtWS.ReadOnly = true;
             this.txtWS.Size = new System.Drawing.Size(666, 20);
             this.txtWS.TabIndex = 0;
-            // 
-            // groupBox7
-            // 
-            this.groupBox7.Controls.Add(this.rbWindowMode);
-            this.groupBox7.Controls.Add(this.rbAndroidMode);
-            this.groupBox7.Location = new System.Drawing.Point(11, 37);
-            this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(507, 51);
-            this.groupBox7.TabIndex = 2;
-            this.groupBox7.TabStop = false;
-            this.groupBox7.Text = "Environement Testing";
-            // 
-            // rbAndroidMode
-            // 
-            this.rbAndroidMode.AutoSize = true;
-            this.rbAndroidMode.Checked = true;
-            this.rbAndroidMode.Location = new System.Drawing.Point(15, 20);
-            this.rbAndroidMode.Name = "rbAndroidMode";
-            this.rbAndroidMode.Size = new System.Drawing.Size(129, 17);
-            this.rbAndroidMode.TabIndex = 3;
-            this.rbAndroidMode.TabStop = true;
-            this.rbAndroidMode.Text = "Android Mode Testing";
-            this.rbAndroidMode.UseVisualStyleBackColor = true;
-            this.rbAndroidMode.CheckedChanged += new System.EventHandler(this.rbAndroidMode_CheckedChanged);
-            // 
-            // rbWindowMode
-            // 
-            this.rbWindowMode.AutoSize = true;
-            this.rbWindowMode.Location = new System.Drawing.Point(176, 20);
-            this.rbWindowMode.Name = "rbWindowMode";
-            this.rbWindowMode.Size = new System.Drawing.Size(157, 17);
-            this.rbWindowMode.TabIndex = 3;
-            this.rbWindowMode.Text = "Window Application Testing";
-            this.rbWindowMode.UseVisualStyleBackColor = true;
-            this.rbWindowMode.CheckedChanged += new System.EventHandler(this.rbWindowMode_CheckedChanged);
-            // 
-            // tabPageWindowApp
-            // 
-            this.tabPageWindowApp.Location = new System.Drawing.Point(4, 22);
-            this.tabPageWindowApp.Name = "tabPageWindowApp";
-            this.tabPageWindowApp.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageWindowApp.Size = new System.Drawing.Size(933, 340);
-            this.tabPageWindowApp.TabIndex = 3;
-            this.tabPageWindowApp.Text = "WindowApp Setting";
-            this.tabPageWindowApp.UseVisualStyleBackColor = true;
-            // 
-            // btnDpadDown
-            // 
-            this.btnDpadDown.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.down;
-            this.btnDpadDown.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnDpadDown.FlatAppearance.BorderSize = 0;
-            this.btnDpadDown.Location = new System.Drawing.Point(434, 52);
-            this.btnDpadDown.Name = "btnDpadDown";
-            this.btnDpadDown.Size = new System.Drawing.Size(58, 54);
-            this.btnDpadDown.TabIndex = 3;
-            this.toolTip1.SetToolTip(this.btnDpadDown, "DPAD DOWN");
-            this.btnDpadDown.UseVisualStyleBackColor = true;
-            // 
-            // btnDpadLeft
-            // 
-            this.btnDpadLeft.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.left;
-            this.btnDpadLeft.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnDpadLeft.FlatAppearance.BorderSize = 0;
-            this.btnDpadLeft.Location = new System.Drawing.Point(379, 52);
-            this.btnDpadLeft.Name = "btnDpadLeft";
-            this.btnDpadLeft.Size = new System.Drawing.Size(55, 53);
-            this.btnDpadLeft.TabIndex = 4;
-            this.toolTip1.SetToolTip(this.btnDpadLeft, "DPAD LEFT");
-            this.btnDpadLeft.UseVisualStyleBackColor = true;
-            // 
-            // btnDpadRight
-            // 
-            this.btnDpadRight.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.right;
-            this.btnDpadRight.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnDpadRight.FlatAppearance.BorderSize = 0;
-            this.btnDpadRight.Location = new System.Drawing.Point(489, 52);
-            this.btnDpadRight.Name = "btnDpadRight";
-            this.btnDpadRight.Size = new System.Drawing.Size(59, 53);
-            this.btnDpadRight.TabIndex = 5;
-            this.toolTip1.SetToolTip(this.btnDpadRight, "DPAD RIGHT");
-            this.btnDpadRight.UseVisualStyleBackColor = true;
-            // 
-            // btnDpadUp
-            // 
-            this.btnDpadUp.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.up;
-            this.btnDpadUp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnDpadUp.FlatAppearance.BorderSize = 0;
-            this.btnDpadUp.Location = new System.Drawing.Point(434, 0);
-            this.btnDpadUp.Name = "btnDpadUp";
-            this.btnDpadUp.Size = new System.Drawing.Size(58, 55);
-            this.btnDpadUp.TabIndex = 6;
-            this.toolTip1.SetToolTip(this.btnDpadUp, "DPAD UP");
-            this.btnDpadUp.UseVisualStyleBackColor = true;
-            // 
-            // pictureBox3
-            // 
-            this.pictureBox3.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox3.Image = global::TalkBackAutoTest.Properties.Resources.icons8_microsoft_excel_48;
-            this.pictureBox3.Location = new System.Drawing.Point(679, 52);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(25, 27);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox3.TabIndex = 7;
-            this.pictureBox3.TabStop = false;
-            this.pictureBox3.Click += new System.EventHandler(this.btnExport_Click);
-            // 
-            // pictureBox2
-            // 
-            this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox2.Image = global::TalkBackAutoTest.Properties.Resources.device_connect;
-            this.pictureBox2.Location = new System.Drawing.Point(804, 52);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(25, 27);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox2.TabIndex = 7;
-            this.pictureBox2.TabStop = false;
-            this.pictureBox2.Click += new System.EventHandler(this.btnGuide_Click);
-            // 
-            // pictureBox5
-            // 
-            this.pictureBox5.Image = global::TalkBackAutoTest.Properties.Resources.tb1;
-            this.pictureBox5.Location = new System.Drawing.Point(136, 55);
-            this.pictureBox5.Name = "pictureBox5";
-            this.pictureBox5.Size = new System.Drawing.Size(93, 78);
-            this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox5.TabIndex = 1;
-            this.pictureBox5.TabStop = false;
-            this.pictureBox5.Click += new System.EventHandler(this.pictureBox5_Click);
-            // 
-            // pictureBox4
-            // 
-            this.pictureBox4.Image = global::TalkBackAutoTest.Properties.Resources.a2;
-            this.pictureBox4.Location = new System.Drawing.Point(16, 55);
-            this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(93, 78);
-            this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox4.TabIndex = 1;
-            this.pictureBox4.TabStop = false;
-            this.pictureBox4.Click += new System.EventHandler(this.pictureBox4_Click);
-            // 
-            // btnRefresh
-            // 
-            this.btnRefresh.BackgroundImage = global::TalkBackAutoTest.Properties.Resources.rf;
-            this.btnRefresh.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnRefresh.FlatAppearance.BorderSize = 0;
-            this.btnRefresh.Location = new System.Drawing.Point(149, 21);
-            this.btnRefresh.Name = "btnRefresh";
-            this.btnRefresh.Size = new System.Drawing.Size(24, 24);
-            this.btnRefresh.TabIndex = 2;
-            this.toolTip1.SetToolTip(this.btnRefresh, "Click here to connect device");
-            this.btnRefresh.UseVisualStyleBackColor = true;
-            this.btnRefresh.VisibleChanged += new System.EventHandler(this.btnRefresh_VisibleChanged);
-            this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::TalkBackAutoTest.Properties.Resources.talbackIcon;
-            this.pictureBox1.Location = new System.Drawing.Point(226, 228);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(30, 29);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Visible = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // contextMenuStrip2
             // 
@@ -1820,8 +2219,11 @@
             this.panel_left.PerformLayout();
             this.panelLeftBot.ResumeLayout(false);
             this.panelLeftBot.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             this.panel_leftTop.ResumeLayout(false);
             this.panel_leftTop.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel_main.ResumeLayout(false);
             this.panelMid_mid.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
@@ -1852,25 +2254,41 @@
             this.tabPage8.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.tabPageWindowApp.ResumeLayout(false);
+            this.groupBox12.ResumeLayout(false);
+            this.groupBox13.ResumeLayout(false);
+            this.groupBox13.PerformLayout();
+            this.tabControl3.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
+            this.tabPage7.ResumeLayout(false);
+            this.tabPage7.PerformLayout();
+            this.tabPage9.ResumeLayout(false);
+            this.tabPage9.PerformLayout();
+            this.groupBox10.ResumeLayout(false);
+            this.groupBox10.PerformLayout();
+            this.groupBox11.ResumeLayout(false);
+            this.groupBox11.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
             this.panel_mid_bot.ResumeLayout(false);
             this.panel_log.ResumeLayout(false);
             this.panel_bot_header.ResumeLayout(false);
             this.panel_bot_header.PerformLayout();
             this.panel_top.ResumeLayout(false);
             this.panel_top.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.contextMenuStrip2.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -2027,6 +2445,37 @@
         private System.Windows.Forms.ToolStripMenuItem openLogFolderToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem viewScreenShotToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem viewScreenRecordToolStripMenuItem;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.Button btngetPackagePC;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.RadioButton rdPCNVDA;
+        private System.Windows.Forms.RadioButton rdPCNarrator;
+        private System.Windows.Forms.ComboBox cbPClistApp;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.GroupBox groupBox10;
+        private System.Windows.Forms.Button btnCheckEnvironmentPC;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cbLangguagePC;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.GroupBox groupBox11;
+        private System.Windows.Forms.RadioButton rdPC_SemiMode;
+        private System.Windows.Forms.RadioButton rdPC_StressMode;
+        private System.Windows.Forms.GroupBox groupBox12;
+        private System.Windows.Forms.GroupBox groupBox13;
+        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.CheckBox checkBox5;
+        private System.Windows.Forms.CheckBox checkBox6;
+        private System.Windows.Forms.CheckBox checkBox8;
+        private System.Windows.Forms.TabControl tabControl3;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.TabPage tabPage7;
+        private System.Windows.Forms.TextBox textBox5;
+        private System.Windows.Forms.TabPage tabPage9;
+        private System.Windows.Forms.TextBox textBox6;
     }
 }
 
