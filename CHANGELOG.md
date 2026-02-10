@@ -16,6 +16,9 @@
 - Strip Narrator clipboard confirmation line and capture after focus change; TalkBackAutoTest/module/pc_automation_clipboard.py.
 - Change tab output ordering to skip initial focus and emit repeated element before stop; TalkBackAutoTest/module/pc_automation_cli.py.
 - Add capture retry, filter clipboard failure line, log mismatch warnings, and keep NarratorText stderr logging; TalkBackAutoTest/module/pc_automation_cli.py.
+- Inline one-off log messages and reduce log noise for expected empty clipboard/Narrator capture cases; TalkBackAutoTest/module/pc_clipboard.py, TalkBackAutoTest/module/pc_automation.py.
+- Simplify Narrator toggle with shared key chord helper; TalkBackAutoTest/module/pc_keys.py.
+- Remove redundant docstrings and unused parameters in PC automation modules; TalkBackAutoTest/module/pc_automation.py, TalkBackAutoTest/module/pc_clipboard.py, TalkBackAutoTest/module/pc_keys.py, TalkBackAutoTest/module/pc_uia.py.
 
 ### Fixed
 

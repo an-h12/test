@@ -9,8 +9,8 @@ except ImportError:
     PatternId = None
     PropertyId = None
 
-from pc_automation_clipboard import copy_narrator_last_spoken
-from pc_automation_core import build_element_info
+from pc_clipboard import copy_narrator_last_spoken
+from pc_element_info import build_element_info
 
 
 NARRATOR_FOCUS_DELAY = 0.35
@@ -29,7 +29,6 @@ EXPAND_COLLAPSE_STATE_NAMES = {
 
 
 def _extract_value_pattern(element):
-    """Extract Value from ValuePattern. Returns string or None."""
     if element.GetPattern(PatternId.ValuePattern):
         pattern = element.GetValuePattern()
         return pattern.Value
@@ -37,7 +36,6 @@ def _extract_value_pattern(element):
 
 
 def _extract_toggle_pattern(element):
-    """Extract ToggleState from TogglePattern. Returns 'On'/'Off'/etc or None."""
     if element.GetPattern(PatternId.TogglePattern):
         pattern = element.GetTogglePattern()
         state = pattern.ToggleState
@@ -47,7 +45,6 @@ def _extract_toggle_pattern(element):
 
 
 def _extract_expand_collapse_pattern(element):
-    """Extract ExpandCollapseState. Returns 'Collapsed'/'Expanded'/etc or None."""
     if element.GetPattern(PatternId.ExpandCollapsePattern):
         pattern = element.GetExpandCollapsePattern()
         state = pattern.ExpandCollapseState
@@ -56,7 +53,6 @@ def _extract_expand_collapse_pattern(element):
 
 
 def _extract_selection_item_pattern(element):
-    """Extract IsSelected from SelectionItemPattern. Returns 'selected'/'non-selected' or None."""
     if element.GetPattern(PatternId.SelectionItemPattern):
         pattern = element.GetSelectionItemPattern()
         return "selected" if pattern.IsSelected else "non-selected"
@@ -115,35 +111,11 @@ def get_runtime_id(element):
     return element.GetRuntimeId()
 
 
-_NARRATOR_TEXT_MISSING = object()
+def _extract_base_properties(element):
+    return element.Name or "", element.LocalizedControlType or ""
 
 
-def get_focused_element_info(narrator_text=_NARRATOR_TEXT_MISSING):
-    """
-    Get information about currently focused UI element.
-
-    dict: Element info with base properties and control-specific patterns.
-            Only includes fields that have values (no None fields).
-            - Always: Name, LocalizedControlType
-            - If set: Position, Value, ToggleState, ExpandCollapseState, IsSelected
-        narrator_text: Optional override; pass None to skip capture.
-        None: If no element focused
-    """
-    if not ensure_available():
-        return None
-
-    time.sleep(NARRATOR_FOCUS_DELAY)
-    element = auto.GetFocusedControl()
-
-    if element is None:
-        print("ERROR: No focused element found", file=sys.stderr)
-        return None
-
-    name = element.Name or ""
-    localized_control_type = element.LocalizedControlType or ""
-
-    position = _extract_position_in_set(element)
-
+def _extract_all_patterns(element):
     control_type_id = element.ControlType
     pattern_names = CONTROL_PATTERNS.get(control_type_id, [])
     pattern_values = {}
@@ -154,13 +126,30 @@ def get_focused_element_info(narrator_text=_NARRATOR_TEXT_MISSING):
             value = handler(element)
             if value is not None:
                 pattern_values[pattern_name] = value
+    
+    return pattern_names, pattern_values
 
-    if narrator_text is _NARRATOR_TEXT_MISSING:
+
+def get_focused_element_info(narrator_text=None):
+    if not ensure_available():
+        return None
+
+    time.sleep(NARRATOR_FOCUS_DELAY)
+    element = auto.GetFocusedControl()
+    if element is None:
+        print("ERROR: No focused element found", file=sys.stderr)
+        return None
+
+    name, control_type = _extract_base_properties(element)
+    position = _extract_position_in_set(element)
+    pattern_names, pattern_values = _extract_all_patterns(element)
+    
+    if narrator_text is None:
         narrator_text = copy_narrator_last_spoken()
 
     return build_element_info(
         name=name,
-        localized_control_type=localized_control_type,
+        localized_control_type=control_type,
         position=position,
         pattern_order=pattern_names,
         pattern_values=pattern_values,

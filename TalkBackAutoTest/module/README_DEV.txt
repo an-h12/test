@@ -3,14 +3,13 @@ Module này cung cấp giao diện dòng lệnh để tự động hóa các tha
 - Gửi phím Tab để điều hướng giao diện
 - Lấy thông tin phần tử UI đang được focus (mới)
 MỤC LỤC:
-- pc_automation.py: stub tương thích, gọi pc_automation_cli.main()
-- pc_automation_cli.py: giữ nguyên hành vi/đầu ra CLI
-- pc_automation_core.py: core thuần, assemble JSON đúng thứ tự
-- pc_automation_uia.py: UIA + trích xuất element
-- pc_automation_clipboard.py: clipboard + Narrator capture
-- pc_automation_keys.py: SendInput/keyboard helpers
+- pc_automation.py: CLI entry point, orchestrates workflows
+- pc_uia.py: UI Automation element inspection
+- pc_clipboard.py: Clipboard and Narrator speech capture
+- pc_keys.py: Keyboard simulation via SendInput
+- pc_element_info.py: JSON serialization of element properties
 
-Lưu ý: Cách dùng CLI vẫn giữ nguyên: python pc_automation.py <action>.
+Lưu ý: Cách dùng CLI: python pc_automation.py <action>.
 
 YÊU CẦU HỆ THỐNG
 ----------------
@@ -248,15 +247,14 @@ DANH SÁCH KIỂM TRA TRIỂN KHAI
 1. Đảm bảo thư mục module/ tồn tại trong thư mục dự án
 2. Copy các file sau vào thư mục module/:
    - pc_automation.py
-   - pc_automation_cli.py
-   - pc_automation_core.py
-   - pc_automation_uia.py
-   - pc_automation_clipboard.py
-   - pc_automation_keys.py
+   - pc_uia.py
+   - pc_clipboard.py
+   - pc_keys.py
+   - pc_element_info.py
 3. Cấu hình .csproj để bao gồm các file module trong build output:
    
    <ItemGroup>
-     <Content Include="module\pc_automation*.py">
+     <Content Include="module\pc_*.py">
        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
      </Content>
    </ItemGroup>

@@ -16,7 +16,7 @@ except ImportError:
     WinrtClipboard = None
 
 
-from pc_automation_keys import (
+from pc_keys import (
     VK_CAPITAL,
     VK_CONTROL,
     VK_X,
@@ -34,6 +34,8 @@ NARRATOR_TOGGLE_DELAY = 0.4
 NARRATOR_TOGGLE_RETRIES = 4
 CLIPBOARD_SEQUENCE_TIMEOUT = 0.5
 CLIPBOARD_SEQUENCE_POLL_DELAY = 0.01
+CLIPBOARD_OPEN_RETRIES = 10
+CLIPBOARD_OPEN_DELAY = 0.01
 
 _user32 = ctypes.windll.user32
 _kernel32 = ctypes.windll.kernel32
@@ -67,8 +69,8 @@ def is_narrator_running():
             if name == "narrator.exe":
                 return True
         return False
+    
     print("WARNING: psutil unavailable; falling back to SPI", file=sys.stderr)
-
     enabled = wintypes.BOOL()
     ok = _user32.SystemParametersInfoW(SPI_GETSCREENREADER, 0, ctypes.byref(enabled), 0)
     if not ok:
@@ -91,14 +93,14 @@ def _start_narrator_process():
     system_root = os.environ.get("SystemRoot", r"C:\Windows")
     narrator_path = os.path.join(system_root, "System32", "Narrator.exe")
     candidates = [narrator_path, "Narrator.exe"]
+    
     for candidate in candidates:
         try:
-            subprocess.Popen(
-                [candidate], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
+            subprocess.Popen([candidate], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             return True
         except Exception:
             continue
+    
     print("Failed to start Narrator.exe directly", file=sys.stderr)
     return False
 
@@ -106,12 +108,15 @@ def _start_narrator_process():
 def _ensure_narrator_on():
     if is_narrator_running():
         return False
+    
     print("INFO: Narrator is off; auto-enabling for capture", file=sys.stderr)
-    toggle_narrator(log_to_stdout=False)
+    toggle_narrator()
+    
     if _wait_for_narrator_state(True):
         return True
     if _start_narrator_process() and _wait_for_narrator_state(True):
         return True
+    
     print("ERROR: Auto-toggle Narrator failed", file=sys.stderr)
     return None
 
@@ -119,7 +124,8 @@ def _ensure_narrator_on():
 def _restore_narrator_if_needed(auto_enabled):
     if not auto_enabled:
         return
-    toggle_narrator(log_to_stdout=False)
+    
+    toggle_narrator()
     if _wait_for_narrator_state(False):
         print("Narrator restored to previous state", file=sys.stderr)
     else:
@@ -132,45 +138,36 @@ def prepare_narrator_capture_session():
 
 
 def restore_narrator_capture_session(auto_enabled):
-    """Restore Narrator state after a capture session."""
     _restore_narrator_if_needed(auto_enabled)
 
 
 def preflight_clipboard_text_format():
-    """Check once if clipboard has text format available."""
     ok, _, has_text = get_clipboard_text()
     if not ok:
         print("ERROR: Clipboard unavailable for Narrator capture", file=sys.stderr)
         return False
-    if not has_text:
-        print(
-            "ERROR: Clipboard has no text format; capture skipped to preserve data",
-            file=sys.stderr,
-        )
-        return False
-    return True
+    return has_text
 
 
 def clear_clipboard_history():
     """Clear clipboard history (Win+V) without affecting pinned items."""
     if WinrtClipboard is None:
-        print(
-            "WARNING: winrt unavailable; clipboard history not cleared",
-            file=sys.stderr,
-        )
+        print("WARNING: winrt unavailable; clipboard history not cleared", file=sys.stderr)
         return False
+    
     try:
         result = WinrtClipboard.clear_history()
     except Exception:
         print("WARNING: Failed to clear clipboard history", file=sys.stderr)
         return False
+    
     if result is False:
         print("WARNING: Clipboard history clear returned False", file=sys.stderr)
         return False
     return True
 
 
-def _open_clipboard(retries=10, delay=0.01):
+def _open_clipboard(retries=CLIPBOARD_OPEN_RETRIES, delay=CLIPBOARD_OPEN_DELAY):
     for _ in range(retries):
         if _user32.OpenClipboard(None):
             return True
@@ -251,51 +248,46 @@ def set_clipboard_text(text):
 
 
 def capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
-    """
-    Trigger Narrator's copy last spoken hotkey and return captured text.
-    Requires Narrator to be running. When allow_no_text_format is False,
-    clipboard text format must be available.
-    Returns None on failure (logs to stderr).
-    """
+    """Trigger Narrator's copy hotkey and return captured text."""
     ok, original_text, has_text = get_clipboard_text()
     if not ok:
         print("ERROR: Clipboard unavailable for Narrator capture", file=sys.stderr)
         return None
     if not has_text and not allow_no_text_format:
-        print(
-            "ERROR: Clipboard has no text format; capture skipped to preserve data",
-            file=sys.stderr,
-        )
         return None
-    had_text_format = has_text
-
-    def _capture_with_key(narrator_vk):
-        seq_before = _get_clipboard_sequence_number()
-        send_key_chord([narrator_vk, VK_CONTROL, VK_X])
-        if not _wait_for_clipboard_sequence_change(seq_before):
-            return None
-        ok_new, new_text, has_text_new = get_clipboard_text()
-        if not ok_new or not has_text_new:
-            return None
-        new_text = _strip_narrator_confirmation(new_text)
-        if not new_text:
-            return None
-        return new_text
-
-    text = None
-    try:
-        text = _capture_with_key(VK_CAPITAL)
-        if text is None:
-            time.sleep(NARRATOR_CLIPBOARD_DELAY)
-            text = _capture_with_key(VK_CAPITAL)
-    finally:
-        if had_text_format and original_text is not None:
-            if not set_clipboard_text(original_text):
-                print("Failed to restore clipboard text", file=sys.stderr)
-
+    
+    text = _try_capture_with_keys()
+    _restore_original_text(has_text, original_text)
+    
     if text is None and log_failure:
-        print("ERROR: Narrator speech capture failed", file=sys.stderr)
+        print("DEBUG: Narrator speech capture returned empty", file=sys.stderr)
     return text
+def _try_capture_with_keys():
+    text = _capture_with_key(VK_CAPITAL)
+    if text is None:
+        time.sleep(NARRATOR_CLIPBOARD_DELAY)
+        text = _capture_with_key(VK_CAPITAL)
+    return text
+
+
+def _restore_original_text(had_text_format, original_text):
+    if had_text_format and original_text is not None:
+        if not set_clipboard_text(original_text):
+            print("Failed to restore clipboard text", file=sys.stderr)
+
+
+def _capture_with_key(narrator_vk):
+    seq_before = _get_clipboard_sequence_number()
+    send_key_chord([narrator_vk, VK_CONTROL, VK_X])
+    
+    if not _wait_for_clipboard_sequence_change(seq_before):
+        return None
+    
+    ok, text, has_text = get_clipboard_text()
+    if not ok or not has_text:
+        return None
+    
+    return _strip_narrator_confirmation(text)
 
 
 def _strip_narrator_confirmation(text):
@@ -311,10 +303,7 @@ def _strip_narrator_confirmation(text):
 
 
 def copy_narrator_last_spoken():
-    """
-    Trigger Narrator's copy last spoken hotkey and return captured text.
-    Returns None on failure (logs to stderr).
-    """
+    """Capture Narrator text with auto-toggle if needed."""
     auto_enabled = prepare_narrator_capture_session()
     if auto_enabled is None:
         return None
@@ -328,16 +317,9 @@ def copy_narrator_last_spoken():
 
 
 def try_capture_narrator_last_spoken(allow_no_text_format=False, log_failure=True):
-    """
-    Capture Narrator text only if Narrator is already running.
-    Returns None if Narrator is off or capture fails.
-    """
+    """Capture if Narrator is already running."""
     if not is_narrator_running():
         return None
-    if not allow_no_text_format:
-        if not preflight_clipboard_text_format():
-            return None
-    return capture_narrator_last_spoken(
-        allow_no_text_format=allow_no_text_format,
-        log_failure=log_failure,
-    )
+    if not allow_no_text_format and not preflight_clipboard_text_format():
+        return None
+    return capture_narrator_last_spoken(allow_no_text_format, log_failure)
