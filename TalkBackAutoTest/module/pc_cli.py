@@ -5,7 +5,7 @@ import sys
 import time
 
 import pc_keys as keys
-import pc_clipboard as clipboard
+import pc_output_narrator as clipboard
 import pc_uia as uia
 
 
@@ -176,6 +176,7 @@ def main():
         sys.exit(0 if success else 1)
 
     if action == "tab":
+        time.sleep(1)
         success = dumpScreen()
         sys.exit(0 if success else 1)
 

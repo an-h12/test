@@ -193,5 +193,7 @@ def getFocusedElementInfo():
 # region Backward Compatibility
 
 get_focused_element_info = getFocusedElementInfo
+dumpFocusedObject = getFocusedElementInfo
+getFocusedObjectFake = getFocusedElementInfo
 
 # endregion

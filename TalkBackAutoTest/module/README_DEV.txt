@@ -3,13 +3,13 @@ Module này cung cấp giao diện dòng lệnh để tự động hóa các tha
 - Gửi phím Tab để điều hướng giao diện
 - Lấy thông tin phần tử UI đang được focus (mới)
 MỤC LỤC:
-- pc_automation.py: CLI entry point, orchestrates workflows
+- pc_cli.py: CLI entry point, orchestrates workflows
 - pc_uia.py: UI Automation element inspection
-- pc_clipboard.py: Clipboard and Narrator speech capture
+- pc_output_narrator.py: Clipboard and Narrator speech capture
 - pc_keys.py: Keyboard simulation via SendInput
 - pc_element_info.py: JSON serialization of element properties
 
-Lưu ý: Cách dùng CLI: python pc_automation.py <action>.
+Lưu ý: Cách dùng CLI: python pc_cli.py <action>.
 
 YÊU CẦU HỆ THỐNG
 ----------------
@@ -26,9 +26,9 @@ YÊU CẦU HỆ THỐNG
 CÁCH SỬ DỤNG DÒNG LỆNH
 -----------------------
 
-1. LẤY THÔNG TIN PHẦN TỬ ĐANG FOCUS (MỚI)
+1. LẤY THÔNG TIN PHẦN TỬ ĐANG FOCUS
    Lệnh:
-     python pc_automation.py get_focused
+     python pc_cli.py get_focused
    
    Mô tả:
      Lấy thông tin về phần tử UI đang được focus hiện tại sử dụng 
@@ -89,7 +89,7 @@ CÁCH SỬ DỤNG DÒNG LỆNH
    Sử dụng từ C#:
      var psi = new ProcessStartInfo {
          FileName = "python.exe",
-         Arguments = "module/pc_automation.py get_focused",
+         Arguments = "module/pc_cli.py get_focused",
          RedirectStandardOutput = true,
          RedirectStandardError = true
      };
@@ -101,7 +101,7 @@ CÁCH SỬ DỤNG DÒNG LỆNH
 
 2. BẬT/TẮT NARRATOR
    Lệnh:
-     python pc_automation.py narrator
+     python pc_cli.py narrator
    
    Mô tả:
      Gửi tổ hợp phím tắt Ctrl + Win + Enter để bật/tắt Narrator.
@@ -114,7 +114,7 @@ CÁCH SỬ DỤNG DÒNG LỆNH
 
 3. NHẤN PHÍM TAB VÀ QUÉT UI ELEMENTS (Tự động với Cycle Detection)
    Lệnh:
-     python pc_automation.py tab
+     python pc_cli.py tab
    
    Mô tả:
     Tự động nhấn phím Tab liên tục để duyệt qua tất cả các phần tử UI trong window hiện tại.
@@ -128,7 +128,7 @@ CÁCH SỬ DỤNG DÒNG LỆNH
     Note: Capture detection uses clipboard sequence number; no sentinel text is written.
     Note: After each successful capture, clipboard history (Win+V) is cleared (pinned preserved) when winrt is available.
     Note: Clipboard history clear is skipped when capture fails.
-    Manual check: `python pc_automation.py tab` should emit output after the first Tab, print the repeated element before stopping, and log mismatch warnings if capture lags.
+    Manual check: `python pc_cli.py tab` should emit output after the first Tab, print the repeated element before stopping, and log mismatch warnings if capture lags.
      
      Tính năng Cycle Detection:
      - Tự động dừng khi phát hiện vòng lặp Tab quay lại element đã gặp
@@ -178,7 +178,7 @@ Sử dụng Pattern RunCommand (Đã có sẵn trong MainForm.cs)
     private void ToggleNarratorPC()
     {
         string modulePath = Path.GetDirectoryName(Application.ExecutablePath) 
-                          + "\\module\\pc_automation.py";
+                          + "\\module\\pc_cli.py";
         string command = "python \"" + modulePath + "\" narrator";
         string output = RunCommand(command, 2000);
         
@@ -196,7 +196,7 @@ Sử dụng Pattern RunCommand (Đã có sẵn trong MainForm.cs)
     private List<ElementInfo> ScanUIElements()
     {
         string modulePath = Path.GetDirectoryName(Application.ExecutablePath) 
-                          + "\\module\\pc_automation.py";
+                          + "\\module\\pc_cli.py";
         
         var psi = new ProcessStartInfo {
             FileName = "python.exe",
@@ -246,9 +246,9 @@ DANH SÁCH KIỂM TRA TRIỂN KHAI
 ------------------------------
 1. Đảm bảo thư mục module/ tồn tại trong thư mục dự án
 2. Copy các file sau vào thư mục module/:
-   - pc_automation.py
+   - pc_cli.py
    - pc_uia.py
-   - pc_clipboard.py
+   - pc_output_narrator.py
    - pc_keys.py
    - pc_element_info.py
 3. Cấu hình .csproj để bao gồm các file module trong build output:
