@@ -83,6 +83,7 @@ def toggle_narrator():
 
 def force_narrator_read():
     """Send Caps Lock + Tab to force Narrator to read the current element."""
+    time.sleep(1)
     send_key_chord([VK_CAPITAL, VK_TAB], hold_time=FORCE_READ_HOLD)
     return True
 
