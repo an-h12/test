@@ -2501,7 +2501,7 @@ namespace TalkBackAutoTest
 
 
 
-                    Object o = PCManager.getFocusedObjectFake(numberOfObject+1);
+                    Object o = PCManager.getFocusedObjectFake(numberOfObject + 1);
                     if (o == null)
                     {
                         return;
@@ -2513,7 +2513,7 @@ namespace TalkBackAutoTest
                         listObject.Add(o);
                         updateXML();
                         //syncHashMap(o);
-                    }   
+                    }
 
                 }
                 catch (Exception ex)
@@ -3619,9 +3619,9 @@ namespace TalkBackAutoTest
             }
 
 
-           
 
-           
+
+
         }
 
         private void btnRun_Click(object sender, EventArgs e)
@@ -5944,7 +5944,7 @@ namespace TalkBackAutoTest
                 wb.SetSheetName(0, "TalkbackTesting");
                 //config style
                 NPOI.SS.UserModel.IFont boldFont = wb.CreateFont();
-                boldFont.Boldweight = (short)FontBoldWeight.Bold;
+                boldFont.IsBold = true;
                 boldFont.Color = IndexedColors.White.Index;
 
                 //head
@@ -8723,7 +8723,7 @@ namespace TalkBackAutoTest
 
         }
 
-        private void updateListApponComboBox(UIAppInfo x =null)
+        private void updateListApponComboBox(UIAppInfo x = null)
         {
             try
             {
@@ -8818,12 +8818,12 @@ namespace TalkBackAutoTest
                 var selectedItem = cbPClistApp.SelectedItem as UIAppInfo;
                 if (selectedItem != null)
                 {
-                    result  = selectedItem.ProcessId;
+                    result = selectedItem.ProcessId;
                 }
-                
+
             }));
             return result;
- 
+
         }
 
         //END PC

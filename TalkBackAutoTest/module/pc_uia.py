@@ -159,6 +159,16 @@ def _build_info_from_element(element):
         pattern_values=pattern_values,
     )
 
+def get_focused_element():
+    if not ensure_available():
+        return None
+
+    time.sleep(NARRATOR_FOCUS_DELAY)
+    element = auto.GetFocusedControl()
+    if element is None:
+        print("No focused element found", file=sys.stderr)
+        return None
+    return element
 # endregion
 
 
@@ -166,24 +176,17 @@ def _build_info_from_element(element):
 
 def get_focused_element_with_info():
     """Get (element_info, runtime_id) in one call — avoids double GetFocusedControl."""
-    if not ensure_available():
-        return None, None
-    time.sleep(NARRATOR_FOCUS_DELAY)
-    element = auto.GetFocusedControl()
+    element = get_focused_element()
     if element is None:
-        print("No focused element found", file=sys.stderr)
         return None, None
-    return _build_info_from_element(element), element.GetRuntimeId()
+    runtime_id = element.GetRuntimeId()
+    return _build_info_from_element(element), runtime_id
 
 
 def getFocusedElementInfo():
     """Get information about currently focused element (no narrator capture)."""
-    if not ensure_available():
-        return None
-    time.sleep(NARRATOR_FOCUS_DELAY)
-    element = auto.GetFocusedControl()
+    element = get_focused_element()
     if element is None:
-        print("No focused element found", file=sys.stderr)
         return None
     return _build_info_from_element(element)
 

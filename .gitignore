@@ -66,3 +66,7 @@ __pycache__
 .cline
 .clinerules
 .codex
+node_modules
+package-lock.json
+package.json
+.serena
