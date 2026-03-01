@@ -38,6 +38,7 @@ CLIPBOARD_SEQUENCE_TIMEOUT = 0.5
 CLIPBOARD_SEQUENCE_POLL_DELAY = 0.01
 CLIPBOARD_OPEN_RETRIES = 10
 CLIPBOARD_OPEN_DELAY = 0.01
+NARRATOR_PROCESS_NAME = "narrator.exe"
 
 _user32 = ctypes.windll.user32
 _kernel32 = ctypes.windll.kernel32
@@ -69,11 +70,11 @@ _kernel32.GlobalUnlock.argtypes = [wintypes.HGLOBAL]
 # region Narrator Process Management
 
 def IsNarratorRunning():
-    """Matches C# PCTB.IsNarratorRunning() - Check if Narrator is running"""
+    """Matches C# PCTB.IsNarratorRunning() - Check if Narrator is running."""
     if psutil is not None:
         for proc in psutil.process_iter(["name"]):
             name = (proc.info.get("name") or "").lower()
-            if name == "narrator.exe":
+            if name == NARRATOR_PROCESS_NAME:
                 return True
         return False
     
@@ -285,9 +286,10 @@ def _try_narrator_capture():
 
 
 def _restore_original_text(had_text_format, original_text):
-    if had_text_format and original_text is not None:
-        if not set_clipboard_text(original_text):
-            print("Failed to restore clipboard text", file=sys.stderr)
+    if not had_text_format or original_text is None:
+        return
+    if not set_clipboard_text(original_text):
+        print("Failed to restore clipboard text", file=sys.stderr)
 
 
 def _do_narrator_capture(narrator_vk):
@@ -327,8 +329,6 @@ def getNarratorOutput():
         return None
 
     try:
-        if not preflight_clipboard_text_format():
-            return None
         return capture_narrator_last_spoken()
     finally:
         restore_narrator_capture_session(auto_enabled)
@@ -338,8 +338,6 @@ def try_capture_narrator_last_spoken(allow_no_text_format=False, log_failure=Tru
     """Capture if Narrator is already running."""
     if not IsNarratorRunning():
         return None
-    if not allow_no_text_format and not preflight_clipboard_text_format():
-        return None
     return capture_narrator_last_spoken(allow_no_text_format, log_failure)
 
 # endregion
@@ -347,8 +345,10 @@ def try_capture_narrator_last_spoken(allow_no_text_format=False, log_failure=Tru
 
 # region Backward Compatibility
 
-is_narrator_running = IsNarratorRunning
-haveNarratorProcess = IsNarratorRunning
+def haveNarratorProcess():
+    return IsNarratorRunning()
+
+
 copy_narrator_last_spoken = getNarratorOutput
 
 # endregion

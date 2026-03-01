@@ -172,7 +172,7 @@ def get_focused_element():
 # endregion
 
 
-# region Public API
+# region pc_cli.py
 
 def get_focused_element_with_info():
     """Get (element_info, runtime_id) in one call — avoids double GetFocusedControl."""
@@ -193,10 +193,16 @@ def getFocusedElementInfo():
 # endregion
 
 
+# region API for C# 
+
+def dumpFocusedObject():
+    return getFocusedElementInfo()
+
+# endregion
+
+
 # region Backward Compatibility
 
 get_focused_element_info = getFocusedElementInfo
-dumpFocusedObject = getFocusedElementInfo
-getFocusedObjectFake = getFocusedElementInfo
 
 # endregion
