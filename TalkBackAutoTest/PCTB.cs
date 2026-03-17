@@ -9,117 +9,365 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Automation;
+using System.Net;
+using Newtonsoft.Json;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
 
 
 namespace TalkBackAutoTest
 {
     class PCTB
     {
+        private static string BaseUrl = Environment.GetEnvironmentVariable("BASE_URL");
+        private static readonly HttpClient client = new HttpClient();
 
         // Import các Windows API cần thiết
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        //[DllImport("user32.dll")]
+        //private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsIconic(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool SetActiveWindow(IntPtr hWnd);
-        // Các hằng số cho ShowWindow
-        private const int SW_RESTORE = 9;
-        private const int SW_SHOW = 5;
-        private const int SW_MAXIMIZE = 3;
+        //[DllImport("user32.dll")]
+        //private static extern bool SetActiveWindow(IntPtr hWnd);
+        //// Các hằng số cho ShowWindow
+        //private const int SW_RESTORE = 9;
+        //private const int SW_SHOW = 5;
+        //private const int SW_MAXIMIZE = 3;
 
+
+
+        //0903
+
+        public class PkgInfo
+        {
+            public string pkgName { get; set; }
+            public string pkgVersion { get; set; }
+            public PkgInfo(string _pkgName, string _pkgVersion)
+            {
+                pkgName = _pkgName;
+                pkgVersion = _pkgVersion;
+            }
+        }
+
+        public PkgInfo GetPkgByKeyword(string keyword)
+        {
+            try
+            {
+                using (WebClient client = new WebClient())
+                {
+                    string json = client.DownloadString(BaseUrl + "/api/app/uwp/search?keyword="+keyword);
+                    var response = JsonConvert.DeserializeObject<dynamic>(json);
+
+                    if (response.success == "true" && response.apps != null)
+                    {
+                        var apps = response.apps;
+                        foreach (var app in apps)
+                        {
+                            int a = 5;
+                            string name = app.Name.ToString();
+                            string PackageFullName = app.PackageFullName.ToString();
+                            //return null;
+                            try
+                            {
+                                string[] parts = PackageFullName.Split(new string[] { "_" }, StringSplitOptions.None);
+                                return new PkgInfo(PackageFullName, parts[1]);
+                            }
+                            catch
+                            {
+
+                            }
+                            return new PkgInfo(PackageFullName, PackageFullName);
+                        }
+
+                        return null;
+                    }
+
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi: " + ex.Message);
+                return null;
+            }
+        }
+
+        public string getKwFromWindowTitle(string windowTitle)
+        {
+            if (windowTitle == "Samsung Notes")
+            {
+                return "SamsungNotes";
+
+            }
+            if (windowTitle == "Samsung Gallery")
+            {
+                return "PCGallery";
+            }
+            //if (windowTitle == "Calculator")
+            //{
+            //    return "WindowsCalculator";
+            //}
+
+            return windowTitle;
+        }
+
+        public string getWindowTitle(int pId)
+        {
+            string windowTitle = "";
+            try
+            {
+                using (WebClient client = new WebClient())
+                {
+                    string json = client.DownloadString(BaseUrl + "/api/window/title?pid="+pId);
+
+                    dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
+
+                    if (data.success == "true")
+                    {
+                        windowTitle = data.window_title.ToString();
+                        return windowTitle;
+                    }
+
+
+                    return windowTitle;
+                }
+            }
+            catch (Exception ex)
+            {
+                return windowTitle;
+            }
+
+        }
+
+
+
+        //public string GetPackageFullNameFromPid(int pid)
+        //{
+        //    try
+        //    {
+        //        Process process = Process.GetProcessById(pid);
+            
+        //        uint length = 0;
+        //        uint result = GetPackageFullName((uint)process.Handle, ref length, null);
+            
+        //        if (result == 234) // ERROR_INSUFFICIENT_BUFFER
+        //        {
+        //            StringBuilder sb = new StringBuilder((int)length);
+        //            result = GetPackageFullName((uint)process.Handle, ref length, sb);
+                
+        //            if (result == 0) // SUCCESS
+        //            {
+        //                string fullName = sb.ToString();
+        //                // Loại bỏ phần suffix (!App, !Microsoft.WindowsCalculator)
+        //                int exclamationIndex = fullName.IndexOf('!');
+        //                if (exclamationIndex >= 0)
+        //                {
+        //                    fullName = fullName.Substring(0, exclamationIndex);
+        //                }
+        //                return fullName;
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Lỗi khi lấy PackageFullName: " + ex.Message);
+        //    }
+        
+        //    return null;
+        //}
+
+        //// Parse packageName từ PackageFullName
+        //public static string GetPackageNameFromFullName(string packageFullName)
+        //{
+        //    if (string.IsNullOrEmpty(packageFullName))
+        //        return null;
+        
+        //    // Format: Name_Version_Architecture_ResourceId_PublisherId
+        //    string[] parts = packageFullName.Split('_');
+        //    return parts.Length >= 1 ? parts[0] : null;
+        //}
+
+        //// Import GetPackageFullName từ kernel32.dll
+        //[DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        //private static extern uint GetPackageFullName(uint hProcess, ref uint packageFullNameLength, StringBuilder packageFullName);
+
+        //end 0903
+
+        //public string GetPackageNameByPid(int pid)
+        //{
+        //    try
+        //    {
+        //        Process process = Process.GetProcessById(pid);
+            
+        //        uint length = 0;
+        //        uint result = GetPackageFullName((uint)process.Handle, ref length, null);
+            
+        //        if (result == 234)
+        //        {
+        //            StringBuilder sb = new StringBuilder((int)length);
+        //            result = GetPackageFullName((uint)process.Handle, ref length, sb);
+                
+        //            if (result == 0)
+        //            {
+        //                string packageFullName = sb.ToString();
+        //                string[] parts = packageFullName.Split('_');
+        //                return parts.Length >= 1 ? parts[0] : null;
+        //            }
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return null;
+        //    }
+        
+        //    return null;
+        //}
 
         public bool ActivateWindowByPID(int pid)
         {
             try
             {
-                // Lấy process từ PID
-                Process process = Process.GetProcessById(pid);
-            
-                // Kiểm tra xem process có cửa sổ chính không
-                if (process.MainWindowHandle == IntPtr.Zero)
+                using (WebClient client = new WebClient())
                 {
-                    Console.WriteLine("Process {pid} không có cửa sổ chính.");
+                    string json = client.DownloadString(BaseUrl + "/api/window/activate?pid=" + pid.ToString());
+                    var response = JsonConvert.DeserializeObject<ApiResponse>(json);
+
+                    if (response.success)
+                    {
+                        return true;
+                    }
+
                     return false;
                 }
-            
-                IntPtr hWnd = process.MainWindowHandle;
-            
-                // Nếu cửa sổ đang minimized, khôi phục lại
-                if (IsIconic(hWnd))
-                {
-                    ShowWindow(hWnd, SW_RESTORE);
-                }
-                else
-                {
-                    // Hiển thị cửa sổ
-                    ShowWindow(hWnd, SW_SHOW);
-                }
-            
-                // Đưa cửa sổ lên foreground
-                SetForegroundWindow(hWnd);
-            
-                // Set làm cửa sổ active
-                SetActiveWindow(hWnd);
-            
-                Console.WriteLine("Đã kích hoạt cửa sổ cho PID: {pid}");
-                return true;
-            }
-            catch (ArgumentException)
-            {
-                Console.WriteLine("Không tìm thấy process với PID: {pid}");
-                return false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Lỗi khi kích hoạt cửa sổ: {ex.Message}");
+                Console.WriteLine("Lỗi: " + ex.Message);
                 return false;
             }
+
+            //try
+            //{
+            //    // Lấy process từ PID
+            //    Process process = Process.GetProcessById(pid);
+
+            //    // Kiểm tra xem process có cửa sổ chính không
+            //    if (process.MainWindowHandle == IntPtr.Zero)
+            //    {
+            //        Console.WriteLine("Process {pid} không có cửa sổ chính.");
+            //        return false;
+            //    }
+
+            //    IntPtr hWnd = process.MainWindowHandle;
+
+            //    // Nếu cửa sổ đang minimized, khôi phục lại
+            //    if (IsIconic(hWnd))
+            //    {
+            //        ShowWindow(hWnd, SW_RESTORE);
+            //    }
+            //    else
+            //    {
+            //        // Hiển thị cửa sổ
+            //        ShowWindow(hWnd, SW_SHOW);
+            //    }
+
+            //    // Đưa cửa sổ lên foreground
+            //    SetForegroundWindow(hWnd);
+
+            //    // Set làm cửa sổ active
+            //    SetActiveWindow(hWnd);
+
+            //    Console.WriteLine("Đã kích hoạt cửa sổ cho PID: {pid}");
+            //    return true;
+            //}
+            //catch (ArgumentException)
+            //{
+            //    Console.WriteLine("Không tìm thấy process với PID: {pid}");
+            //    return false;
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Lỗi khi kích hoạt cửa sổ: {ex.Message}");
+            //    return false;
+            //}
         }
 
 
 
 
 
-        [DllImport("user32.dll")]
-        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
+        //[DllImport("user32.dll")]
+        //private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
 
-        private const int VK_TAB = 0x09;
-        private const int KEYEVENTF_EXTENDEDKEY = 0x0001;
-        private const int KEYEVENTF_KEYUP = 0x0002;
-        private const byte VK_CONTROL = 0x11;
-        private const byte VK_LWIN = 0x5B;
-        private const byte VK_RETURN = 0x0D;
+        //private const int VK_TAB = 0x09;
+        //private const int KEYEVENTF_EXTENDEDKEY = 0x0001;
+        //private const int KEYEVENTF_KEYUP = 0x0002;
+        //private const byte VK_CONTROL = 0x11;
+        //private const byte VK_LWIN = 0x5B;
+        //private const byte VK_RETURN = 0x0D;
 
-        private const string NarratorProcessName = "narrator";
+        //private const string NarratorProcessName = "narrator";
+
+
+        //0903
+        public DeviceInfo getDeviceInfo()
+        {
+            DeviceInfo d = new DeviceInfo();
+            try
+            {
+                using (WebClient client = new WebClient())
+                {
+                    string json = client.DownloadString(BaseUrl + "/api/device/info");
+
+                    dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
+
+                    if (data.success == "true")
+                    {
+                        d.modelName = data.modelName.ToString();
+                        d.binaryName = data.binaryName.ToString();
+                        d.serial = data.serial.ToString();
+                        d.type = data.type.ToString();
+                        d.branch = data.branch.ToString();
+                    }
+
+                    
+                    return d;
+                }
+            }
+            catch (Exception ex)
+            {
+                return d;
+            }
+        }
+        //end0903
 
         #region Narattor
 
-        private void senHotKey()
-        {
-            // Nhấn Ctrl
-            keybd_event(VK_CONTROL, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        //private void senHotKey()
+        //{
+        //    // Nhấn Ctrl
+        //    keybd_event(VK_CONTROL, 0, KEYEVENTF_EXTENDEDKEY, 0);
 
-            // Nhấn Win
-            keybd_event(VK_LWIN, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        //    // Nhấn Win
+        //    keybd_event(VK_LWIN, 0, KEYEVENTF_EXTENDEDKEY, 0);
 
-            // Nhấn Enter
-            keybd_event(VK_RETURN, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        //    // Nhấn Enter
+        //    keybd_event(VK_RETURN, 0, KEYEVENTF_EXTENDEDKEY, 0);
 
-            // Thả Enter
-            keybd_event(VK_RETURN, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+        //    // Thả Enter
+        //    keybd_event(VK_RETURN, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
 
-            // Thả Win
-            keybd_event(VK_LWIN, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+        //    // Thả Win
+        //    keybd_event(VK_LWIN, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
 
-            // Thả Ctrl
-            keybd_event(VK_CONTROL, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-        }
+        //    // Thả Ctrl
+        //    keybd_event(VK_CONTROL, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+        //}
 
         public void StartNarratorNVDA()
         {
@@ -127,16 +375,35 @@ namespace TalkBackAutoTest
             if (TalkBackAutoTest.Properties.Settings.Default.pcmethodouput == 1)//narrator
             {
                 //UIAutomationHelper.GetUIDumpForAppById(26164);
-                if (haveNarratorProcess() == false)
+                //if (haveNarratorProcess() == false)
+                //{
+                //    System.Console.Write("Ongoing Start Narrator");
+                //    System.Threading.Thread.Sleep(5000);
+                //    senHotKey();
+                //    System.Threading.Thread.Sleep(20000);
+                //}
+                //else
+                //{
+                //    System.Console.Write("Existed Narrator");
+                //}
+
+                try
                 {
-                    System.Console.Write("Ongoing Start Narrator");
-                    System.Threading.Thread.Sleep(5000);
-                    senHotKey();
-                    System.Threading.Thread.Sleep(20000);
+                    var content = new StringContent("", Encoding.UTF8, "application/json");
+                    var response = client.PostAsync(BaseUrl + "/api/narrator/start", content).Result; // Blocking
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string json = response.Content.ReadAsStringAsync().Result; // Blocking
+                        dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
+                        //return data.success;
+                    }
+                    //return false;
                 }
-                else
+                catch (Exception ex)
                 {
-                    System.Console.Write("Existed Narrator");
+                    Console.WriteLine("Lỗi: " + ex.Message);
+                    //return false;
                 }
             }
             else
@@ -149,17 +416,36 @@ namespace TalkBackAutoTest
         {
             if (TalkBackAutoTest.Properties.Settings.Default.pcmethodouput == 1)//narrator
             {
-                if (haveNarratorProcess() == true)
+                try
                 {
-                    System.Console.Write("Ongoing Stop Narrator");
-                    System.Threading.Thread.Sleep(3000);
-                    senHotKey();
-                    System.Threading.Thread.Sleep(5000);
+                    var content = new StringContent("", Encoding.UTF8, "application/json");
+                    var response = client.PostAsync(BaseUrl + "/api/narrator/stop", content).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string json = response.Content.ReadAsStringAsync().Result;
+                        dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
+                        //return data.success;
+                    }
+                    //return false;
                 }
-                else
+                catch (Exception ex)
                 {
-                    System.Console.Write("Stopped Narrator");
+                    Console.WriteLine("Lỗi: " + ex.Message);
+                    //return false;
                 }
+
+                //if (haveNarratorProcess() == true)
+                //{
+                //    System.Console.Write("Ongoing Stop Narrator");
+                //    System.Threading.Thread.Sleep(3000);
+                //    senHotKey();
+                //    System.Threading.Thread.Sleep(5000);
+                //}
+                //else
+                //{
+                //    System.Console.Write("Stopped Narrator");
+                //}
             }
             else
             {
@@ -167,11 +453,24 @@ namespace TalkBackAutoTest
             }
         }
 
-        public bool IsNarratorRunning()
-        {
-            System.Console.Write("Ongoing Check status of Narrator");
-            return true;
-        }
+        //public bool haveNarratorProcess()
+        //{
+        //    var uiApps = GetRunningUIApplications();
+        //    foreach (UIAppInfo x in uiApps)
+        //    {
+        //        if (x.ProcessName.ToString().ToLower().Contains("narrator"))
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
+
+        //public bool IsNarratorRunning()
+        //{
+        //    System.Console.Write("Ongoing Check status of Narrator");
+        //    return true;
+        //}
 
         public void getNarratorOutput()
         {
@@ -207,17 +506,46 @@ namespace TalkBackAutoTest
         #region Execution
         public void gotoScreen(string appName)
         {
-            System.Console.Write("Ongoing gotoScreen");
+            //System.Console.Write("Ongoing gotoScreen");
             //Process.Start("SamsungNotes.exe");
+
+            //GetPkgByKeyword("SamsungNotes");
         }
 
         public void changeFocus()
         {
-            System.Console.Write("Ongoing changeFocus");
+            //System.Console.Write("Ongoing changeFocus");
 
-            keybd_event(VK_TAB, 0, KEYEVENTF_EXTENDEDKEY, 0);
-            // Thả Ctrl
-            keybd_event(VK_TAB, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+            //keybd_event(VK_TAB, 0, KEYEVENTF_EXTENDEDKEY, 0);
+            //// Thả Ctrl
+            //keybd_event(VK_TAB, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+            try
+            {
+                var requestBody = new
+                {
+                    count = 1
+                };
+
+                string json = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = client.PostAsync(BaseUrl + "/api/ui/send_tab", content).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseJson = response.Content.ReadAsStringAsync().Result;
+                    dynamic data = JsonConvert.DeserializeObject<dynamic>(responseJson);
+                    //return data.success;
+                }
+
+                //return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi khi gửi TAB: " + ex.Message);
+                //return false;
+            }
+
         }
 
         public void dumpScreen()
@@ -242,9 +570,33 @@ namespace TalkBackAutoTest
             //    Console.WriteLine(calcDump);
         }
 
-        public void dumpFocusedObject()
+        public string dumpFocusedObject()
         {
-            System.Console.Write("Ongoing dumpFocusedObject");
+            //System.Console.Write("Ongoing dumpFocusedObject");
+
+            try
+            {
+                var response = client.GetAsync(BaseUrl + "/api/ui/focused_element").Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string json = response.Content.ReadAsStringAsync().Result;
+                    var data = JsonConvert.DeserializeObject<dynamic>(json);
+
+                    if (data.success=="True" && data.element != null)
+                    {
+                        return data.element.ToString();
+                    }
+                }
+
+                return "NA";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi khi lấy focused element: " + ex.Message);
+                return "TRYCATCH_NA";
+            }
+
         }
 
         public void checkIssue(string objectName, string textOutput)
@@ -274,12 +626,56 @@ namespace TalkBackAutoTest
 
         public void cleanLogPC()
         {
-            System.Console.Write("Ògoing cleanLogPC");
+            System.Console.Write("Ongoing cleanLogPC");
         }
 
-        public void getObjectScreenShot()
+        public void getObjectScreenShot(string folderResult,int pid)
         {
             System.Console.Write("Ongoing getObjectScreenShot");
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    // Tạo thư mục nếu chưa có
+                    if (!Directory.Exists(folderResult))
+                    {
+                        Directory.CreateDirectory(folderResult);
+                    }
+
+                    // Đường dẫn file screenshot.png
+                    string filepath = Path.Combine(folderResult, "screenshot.png");
+
+                    // Build URL API - .NET 4.5 không dùng string interpolation ($)
+                    string url = BaseUrl + "/api/capture/pid?pid="+pid+"&path=" + Uri.EscapeDataString(filepath);
+
+                    // Gọi API
+                    var response = client.GetAsync(url).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string json = response.Content.ReadAsStringAsync().Result;
+                        var data = JsonConvert.DeserializeObject<dynamic>(json);
+
+                        if (data.success == true)
+                        {
+                            System.Console.WriteLine("Screenshot đã lưu: " + filepath);
+                        }
+                        else
+                        {
+                            System.Console.WriteLine("Lỗi: " + data.message);
+                        }
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("Lỗi HTTP: " + response.StatusCode);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine("Lỗi: " + ex.Message);
+            }
+
         }
 
         public void getLogPC()
@@ -317,7 +713,7 @@ namespace TalkBackAutoTest
                 CreateNoWindow = true
             };
 
-            
+
             using (Process process = new Process())
             {
                 process.StartInfo = psi;
@@ -335,11 +731,11 @@ namespace TalkBackAutoTest
                     System.Threading.Thread.Sleep(3000);
                     List<UIAppInfo> lists = GetRunningUIApplications();
                     //update cbbox voi selectted later
-                    foreach(UIAppInfo x in lists)
+                    foreach (UIAppInfo x in lists)
                     {
                         if (x.WindowTitle.Contains("Notes"))
                         {
-                           return x;
+                            return x;
                         }
                     }
                     return null;
@@ -353,58 +749,75 @@ namespace TalkBackAutoTest
             return "";
         }
 
-        public bool haveNarratorProcess()
+
+
+        public class ApiResponse
         {
-            var uiApps = GetRunningUIApplications();
-            foreach (UIAppInfo x in uiApps)
-            {
-                if (x.ProcessName.ToString().ToLower().Contains("narrator"))
-                {
-                    return true;
-                }
-            }
-            return false;
+            public bool success { get; set; }
+            public int total_apps { get; set; }
+            public List<UIAppInfo> apps { get; set; }
         }
 
         public List<UIAppInfo> GetRunningUIApplications()
         {
-            var uiApps = new List<UIAppInfo>();
-
-            // Lấy tất cả các process đang chạy
-            var processes = Process.GetProcesses();
 
             try
             {
-                // Lọc các process có cửa sổ chính
-                foreach (var process in processes.Where(p => p.MainWindowHandle != IntPtr.Zero))
+                using (WebClient client = new WebClient())
                 {
-                    try
+                    string json = client.DownloadString(BaseUrl + "/api/system/ui-apps");
+                    var response = JsonConvert.DeserializeObject<ApiResponse>(json);
+
+                    if (response.success && response.apps != null)
                     {
-                        uiApps.Add(new UIAppInfo
-                        {
-                            ProcessName = process.ProcessName,
-                            ProcessId = process.Id,
-                            WindowTitle = process.MainWindowTitle,
-                            ExecutablePath = GetProcessPath(process)
-                        });
+                        return response.apps;
                     }
-                    catch
-                    {
-                        // Bỏ qua process không thể truy cập
-                        continue;
-                    }
+
+                    return new List<UIAppInfo>();
                 }
             }
-            finally
+            catch (Exception ex)
             {
-                // Giải phóng tài nguyên
-                foreach (var process in processes)
-                {
-                    process.Dispose();
-                }
+                Console.WriteLine("Lỗi: " + ex.Message);
+                return new List<UIAppInfo>();
             }
 
-            return uiApps;
+            //var uiApps = new List<UIAppInfo>();
+            //// Lấy tất cả các process đang chạy
+            //var processes = Process.GetProcesses();
+
+            //try
+            //{
+            //    // Lọc các process có cửa sổ chính
+            //    foreach (var process in processes.Where(p => p.MainWindowHandle != IntPtr.Zero))
+            //    {
+            //        try
+            //        {
+            //            uiApps.Add(new UIAppInfo
+            //            {
+            //                ProcessName = process.ProcessName,
+            //                ProcessId = process.Id,
+            //                WindowTitle = process.MainWindowTitle,
+            //                ExecutablePath = GetProcessPath(process)
+            //            });
+            //        }
+            //        catch
+            //        {
+            //            // Bỏ qua process không thể truy cập
+            //            continue;
+            //        }
+            //    }
+            //}
+            //finally
+            //{
+            //    // Giải phóng tài nguyên
+            //    foreach (var process in processes)
+            //    {
+            //        process.Dispose();
+            //    }
+            //}
+
+            //return uiApps;
         }
 
         private static string GetProcessPath(Process process)
@@ -422,9 +835,28 @@ namespace TalkBackAutoTest
         #endregion other
 
 
-        public Object getFocusedObjectFake(int objIdx)
+        public Object getFocusedObjectFake(int objIdx, string objElement, string windowTitle, PkgInfo pkgInfo)
         {
-            AutomationElement focusedElement = AutomationElement.FocusedElement;
+            //AutomationElement focusedElement = AutomationElement.FocusedElement;
+
+            JObject json = JObject.Parse(@objElement);
+            string objName = "BLANK";
+
+            if (json["name"] != null)
+            {
+                objName = json["name"].ToString();
+            }
+
+
+            string PackageName = "";
+            string PackageVersion = "";
+            if (pkgInfo != null)
+            {
+                PackageName = pkgInfo.pkgName;
+                PackageVersion = pkgInfo.pkgVersion;
+            }
+
+            
 
             string[] values = { "Pass", "Pass", "Pass", "Pass", "Fail", "Consider" };
             Random random = new Random();
@@ -432,7 +864,8 @@ namespace TalkBackAutoTest
             string randomResult = values[index];
             string ErrorType = randomResult;
 
-            return new Object(objIdx, "OBJID_" + objIdx, "currentScreen_" + objIdx, "package_" + objIdx, "packageVersion_" + objIdx, "objectInformation", "talkbackText", randomResult, System.DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"), "allTextDes_optimize", "random_mode", "NA", ErrorType);
+            //return new Object(objIdx, "OBJID_" + objIdx, "currentScreen_" + objIdx, "package_" + objIdx, "packageVersion_" + objIdx, "objectInformation", "talkbackText", randomResult, System.DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"), "allTextDes_optimize", "random_mode", "NA", ErrorType);
+            return new Object(objIdx, "OBJID_" + objIdx, windowTitle, PackageName, PackageVersion, objElement, "talkbackText", randomResult, System.DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"), objName, "random_mode", "NA", ErrorType);
         }
     }
 
@@ -562,63 +995,58 @@ namespace TalkBackAutoTest
 
 
 
-//        ## Lệnh CMD để start UWP app qua Package ID
+        //        ## Lệnh CMD để start UWP app qua Package ID
 
-//**Quan trọng:** UWP app không start trực tiếp bằng Package ID, mà cần dùng **AUMID** (Application User Model ID).
+        //**Quan trọng:** UWP app không start trực tiếp bằng Package ID, mà cần dùng **AUMID** (Application User Model ID).
 
-//### 1. Cách tìm AUMID từ Package ID
+        //### 1. Cách tìm AUMID từ Package ID
 
-//```cmd
-//# Liệt kê tất cả UWP app với AUMID
-//powershell "Get-AppxPackage | Select-Object Name, PackageFamilyName"
+        //```cmd
+        //# Liệt kê tất cả UWP app với AUMID
+        //powershell "Get-AppxPackage | Select-Object Name, PackageFamilyName"
 
-//# Tìm AUMID cụ thể cho một Package Name
-//powershell "Get-AppxPackage 'Microsoft.WindowsCalculator' | Select-Object Name, PackageFamilyName"
-//```
+        //# Tìm AUMID cụ thể cho một Package Name
+        //powershell "Get-AppxPackage 'Microsoft.WindowsCalculator' | Select-Object Name, PackageFamilyName"
+        //```
 
-//### 2. Lệnh CMD start UWP app bằng AUMID
+        //### 2. Lệnh CMD start UWP app bằng AUMID
 
-//```cmd
-//# Cách 1: Dùng shell:AppsFolder
-//start shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App
+        //```cmd
+        //# Cách 1: Dùng shell:AppsFolder
+        //start shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App
 
-//# Cách 2: Dùng PowerShell
-//powershell -command "Start-Process 'shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App'"
+        //# Cách 2: Dùng PowerShell
+        //powershell -command "Start-Process 'shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App'"
 
-//# Cách 3: Dùng explorer
-//explorer shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb
+        //# Cách 3: Dùng explorer
+        //explorer shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb
 
-//        ## Lệnh CMD để start UWP app qua Package ID
+        //        ## Lệnh CMD để start UWP app qua Package ID
 
-//**Quan trọng:** UWP app không start trực tiếp bằng Package ID, mà cần dùng **AUMID** (Application User Model ID).
+        //**Quan trọng:** UWP app không start trực tiếp bằng Package ID, mà cần dùng **AUMID** (Application User Model ID).
 
-//### 1. Cách tìm AUMID từ Package ID
+        //### 1. Cách tìm AUMID từ Package ID
 
-//```cmd
-//# Liệt kê tất cả UWP app với AUMID
-//powershell "Get-AppxPackage | Select-Object Name, PackageFamilyName"
+        //```cmd
+        //# Liệt kê tất cả UWP app với AUMID
+        //powershell "Get-AppxPackage | Select-Object Name, PackageFamilyName"
 
-//# Tìm AUMID cụ thể cho một Package Name
-//powershell "Get-AppxPackage 'Microsoft.WindowsCalculator' | Select-Object Name, PackageFamilyName"
-//```
+        //# Tìm AUMID cụ thể cho một Package Name
+        //powershell "Get-AppxPackage 'Microsoft.WindowsCalculator' | Select-Object Name, PackageFamilyName"
+        //```
 
-//### 2. Lệnh CMD start UWP app bằng AUMID
+        //### 2. Lệnh CMD start UWP app bằng AUMID
 
-//```cmd
-//# Cách 1: Dùng shell:AppsFolder
-//start shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App
+        //```cmd
+        //# Cách 1: Dùng shell:AppsFolder
+        //start shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App
 
-//# Cách 2: Dùng PowerShell
-//powershell -command "Start-Process 'shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App'"
+        //# Cách 2: Dùng PowerShell
+        //powershell -command "Start-Process 'shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb3d8bbwe!App'"
 
-//# Cách 3: Dùng explorer
-//explorer shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb
+        //# Cách 3: Dùng explorer
+        //explorer shell:AppsFolder\Microsoft.WindowsCalculator_8wekyb
 
 
     }
-
-
-
-
-
 }

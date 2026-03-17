@@ -28,6 +28,8 @@ using System.Management;
 //using System.Text.RegularExpressions;
 using WK.Libraries.BetterFolderBrowserNS;
 using Microsoft.Win32;
+using System.Security.Cryptography;
+using System.Net;
 namespace TalkBackAutoTest
 {
     public partial class MainForm : Form
@@ -2453,13 +2455,13 @@ namespace TalkBackAutoTest
 
 
         //pc
-        private void getObjectInScreenPC(int MAX1SCREEN, string testingmode)
+        private void getObjectInScreenPC(int MAX1SCREEN, string testingmode, string windowTitle, int pid, TalkBackAutoTest.PCTB.PkgInfo pkgInfo)
         {
             Object firsTObject = null;
 
             for (int i = 1; i <= 1000; i++)
             {
-                if (i == 20)
+                if (i == 10)
                 {
                     break;
                 }
@@ -2492,16 +2494,17 @@ namespace TalkBackAutoTest
                     PCManager.StopRecordVideo();
 
                     PCManager.getNarratorOutput();
-                    PCManager.dumpFocusedObject();
+                    Thread.Sleep(5000);
+                    string objElement = PCManager.dumpFocusedObject();
                     PCManager.dumpScreen();
                     PCManager.checkIssue("1", "2");
 
-                    PCManager.getObjectScreenShot();
+                    PCManager.getObjectScreenShot(@folderResult,pid);
                     PCManager.getLogPC();
 
 
 
-                    Object o = PCManager.getFocusedObjectFake(numberOfObject + 1);
+                    Object o = PCManager.getFocusedObjectFake(numberOfObject + 1, objElement, windowTitle, pkgInfo);
                     if (o == null)
                     {
                         return;
@@ -2513,7 +2516,7 @@ namespace TalkBackAutoTest
                         listObject.Add(o);
                         updateXML();
                         //syncHashMap(o);
-                    }
+                    }   
 
                 }
                 catch (Exception ex)
@@ -2927,22 +2930,39 @@ namespace TalkBackAutoTest
                     //random APP???
                     //START APP and stresshere
                     //end
-                    UIAppInfo x = PCManager.startUWPApp("SAMSUNGELECTRONICSCoLtd.SamsungNotes_wyx1vj98g3asy!App");
-                    updateListApponComboBox(x);
+
+                    //UIAppInfo x = PCManager.startUWPApp("SAMSUNGELECTRONICSCoLtd.SamsungNotes_wyx1vj98g3asy!App");
+                    //updateListApponComboBox(x);
 
                     PCManager.StartNarratorNVDA();
+
+                    string windowTitle = "";
+                    string packageName = "";
                     int pId = getTestingPID_PC();
                     if (pId != -1)
                     {
                         PCManager.ActivateWindowByPID(pId);
+                        windowTitle = PCManager.getWindowTitle(pId);
+                        //packageName = PCManager.GetPackageFullNameFromPid(pId);
                     }
+
 
                     int indexStart = getNumberOfObject();
                     PCManager.gotoScreen("AppName");
 
 
                     string testtingMode = "random";
-                    getObjectInScreenPC(MAX1SCREEN, testtingMode);
+
+
+                    string kw = PCManager.getKwFromWindowTitle(windowTitle);
+                    //if (windowTitle == "Samsung Notes")
+                    //{
+                    //    kw = "SamsungNotes";
+                    //}
+
+                    TalkBackAutoTest.PCTB.PkgInfo pkgInfo = PCManager.GetPkgByKeyword(kw);
+
+                    getObjectInScreenPC(MAX1SCREEN, testtingMode, windowTitle, pId, pkgInfo);
 
                     int indexEnd = getNumberOfObject();
                     //getAnotherObjectsFromStartEnd(indexStart, indexEnd);
@@ -2970,7 +2990,18 @@ namespace TalkBackAutoTest
 
 
                     string testtingMode = "random";
-                    getObjectInScreenPC(MAX1SCREEN, testtingMode);
+
+                    string windowTitle = "";
+
+                    string kw = windowTitle;
+                    if (windowTitle == "Samsung Notes")
+                    {
+                        kw = "SamsungNotes";
+                    }
+
+                    TalkBackAutoTest.PCTB.PkgInfo pkgInfo = PCManager.GetPkgByKeyword(kw);
+
+                    getObjectInScreenPC(MAX1SCREEN, testtingMode, windowTitle, pId, pkgInfo);
 
                     int indexEnd = getNumberOfObject();
                     //getAnotherObjectsFromStartEnd(indexStart, indexEnd);
@@ -3619,9 +3650,9 @@ namespace TalkBackAutoTest
             }
 
 
+           
 
-
-
+           
         }
 
         private void btnRun_Click(object sender, EventArgs e)
@@ -4446,14 +4477,18 @@ namespace TalkBackAutoTest
 
         private void getDeviceInformationPC(int mode)
         {
-            printLog("Ongoing get PC environment");
-            string computerName = Environment.MachineName;
-            string modelName = GetWMIValue("Win32_ComputerSystem", "Model");
-            string manufacturer = GetWMIValue("Win32_ComputerSystem", "Manufacturer");
-            manufacturer = manufacturer.Contains("SAMSUNG") ? "SAMSUNG" : manufacturer;
-            string os = GetOSInfo();//binary name
 
-            updateDeviceInfomationonUI(modelName, os, computerName, "Window App Mode", manufacturer);
+            DeviceInfo dPC = PCManager.getDeviceInfo();
+            updateDeviceInfomationonUI(dPC.modelName, dPC.binaryName, dPC.serial,dPC.type, dPC.branch);
+
+            //printLog("Ongoing get PC environment");
+            //string computerName = Environment.MachineName;
+            //string modelName = GetWMIValue("Win32_ComputerSystem", "Model");
+            //string manufacturer = GetWMIValue("Win32_ComputerSystem", "Manufacturer");
+            //manufacturer = manufacturer.Contains("SAMSUNG") ? "SAMSUNG" : manufacturer;
+            //string os = GetOSInfo();//binary name
+
+            //updateDeviceInfomationonUI(modelName, os, computerName, "Window App Mode", manufacturer);
         }
 
         //pc
@@ -4812,8 +4847,9 @@ namespace TalkBackAutoTest
         }
         private void Form1_Shown(object sender, EventArgs e)
         {
-            getDeviceInformation();
             initProject();
+            getDeviceInformation();
+            
             updatecomboBoxPkg();
             initcomboBox();
 
@@ -5944,7 +5980,7 @@ namespace TalkBackAutoTest
                 wb.SetSheetName(0, "TalkbackTesting");
                 //config style
                 NPOI.SS.UserModel.IFont boldFont = wb.CreateFont();
-                boldFont.IsBold = true;
+                boldFont.Boldweight = (short)FontBoldWeight.Bold;
                 boldFont.Color = IndexedColors.White.Index;
 
                 //head
@@ -8710,9 +8746,90 @@ namespace TalkBackAutoTest
             }
         }
 
+        string secretKey = Environment.GetEnvironmentVariable("SECRET_KEY"); // 32 ký tự
+        string fixedIv = Environment.GetEnvironmentVariable("ENCRYPTION_IV");
+        string key = Environment.GetEnvironmentVariable("API_KEY");
+        string baseUrl = Environment.GetEnvironmentVariable("API_BASE_URL");
+        string getDevTokenUrl = Environment.GetEnvironmentVariable("GET_DEV_TOKEN_URL"); // Thêm environment variable cho URL
+        
+        public void getDevToken()
+        {
+            try
+            {
+                string apiUrl = baseUrl + getDevTokenUrl + key;
+
+                using (WebClient client = new WebClient())
+                {
+                    client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                    string jsonResponse = client.DownloadString(apiUrl);
+                    //MessageBox.Show(jsonResponse);
+                    //xu lyjsonResponse neus status= sucess thi tach ra token va goi gam Deceypt
+                    var json = Newtonsoft.Json.Linq.JObject.Parse(jsonResponse);
+                    string status = json["status"]?.ToString();
+                    string token = json["token"]?.ToString();
+
+                    if (status == "success" && !string.IsNullOrEmpty(token))
+                    {
+                        string decryptedToken = Decrypt(token);
+                        MessageBox.Show("Decrypted Token: " + decryptedToken);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to get token: " + jsonResponse);
+                    }
+                }
+              
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        public string Decrypt(string encryptedToken)
+        {
+            
+            try
+            {
+                byte[] key;
+                using (var sha = SHA256.Create())
+                {
+                    key = sha.ComputeHash(Encoding.UTF8.GetBytes(secretKey));
+                }
+
+                byte[] iv = Encoding.UTF8.GetBytes(fixedIv);
+                byte[] cipherText = Convert.FromBase64String(encryptedToken);
+
+                using (var aes = Aes.Create())
+                {
+                    aes.Key = key;
+                    aes.IV = iv;
+                    aes.Mode = CipherMode.CBC;
+                    aes.Padding = PaddingMode.PKCS7;
+
+                    ICryptoTransform decryptor = aes.CreateDecryptor();
+
+                    using (var ms = new MemoryStream(cipherText))
+                    using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                    using (var sr = new StreamReader(cs))
+                    {
+                        return sr.ReadToEnd();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Lỗi giải mã: " + ex.Message;
+            }
+        }
+
         private void pictureBox4_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("PO5 Team ^^");
+            //MessageBox.Show("PO5 Team ^^");
+            // Secret key PHẢI giống y chang bên PHP
+
+            getDevToken();
+    
         }
 
         private void pictureBox5_Click(object sender, EventArgs e)
@@ -8723,7 +8840,7 @@ namespace TalkBackAutoTest
 
         }
 
-        private void updateListApponComboBox(UIAppInfo x = null)
+        private void updateListApponComboBox(UIAppInfo x =null)
         {
             try
             {
@@ -8818,12 +8935,12 @@ namespace TalkBackAutoTest
                 var selectedItem = cbPClistApp.SelectedItem as UIAppInfo;
                 if (selectedItem != null)
                 {
-                    result = selectedItem.ProcessId;
+                    result  = selectedItem.ProcessId;
                 }
-
+                
             }));
             return result;
-
+ 
         }
 
         //END PC
