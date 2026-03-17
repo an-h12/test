@@ -25,7 +25,7 @@ digraph NarratorCaptureWorkflow {
     start [shape=doublecircle, label="Start"];
 
     ensure_narrator [shape=diamond, label="Narrator\nRunning?"];
-    toggle_narrator [shape=box, label="ToggleNarrator()\n(Ctrl+Win+Return)"];
+    toggle_narrator [shape=box, label="ToggleNarrator()\n(Ctrl+Win+Enter)"];
     force_read [shape=box, label="ForceNarratorRead()\n(Caps+Tab)"];
     capture [shape=box, label="DoNarratorCapture()\n(Caps+Ctrl+X)"];
     get_clipboard [shape=box, label="GetClipboardText()"];
@@ -55,7 +55,7 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 | Python (snake_case) | C# (PascalCase) | Source File | Purpose |
 |---------------------|-----------------|-------------|---------|
 | `IsNarratorRunning()` | `IsNarratorRunning()` | pc_output_narrator.py | Check if narrator.exe running |
-| `toggle_narrator()` | `ToggleNarrator()` | pc_keys.py | Toggle Narrator on/off (Ctrl+Win+Return) |
+| `toggle_narrator()` | `ToggleNarrator()` | pc_keys.py | Toggle Narrator on/off (Ctrl+Win+Enter) |
 | `force_narrator_read()` | `ForceNarratorRead()` | pc_keys.py | Force read current element (Caps+Tab) |
 | `_do_narrator_capture()` | `DoNarratorCapture()` | pc_output_narrator.py | Main capture logic (Caps+Ctrl+X) |
 | `capture_narrator_last_spoken()` | `CaptureNarratorLastSpoken()` | pc_output_narrator.py | Full capture workflow |
@@ -92,7 +92,7 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 **Steps:**
 - [ ] Add `SendKeyEvent(int vkCode)` - Send single key using SendKeys
 - [ ] Add `SendKeyChord(string keyCombo)` - Send key combination using SendKeys format
-- [ ] Add `ToggleNarrator()` - Ctrl+Win+Return
+- [ ] Add `ToggleNarrator()` - Ctrl+Win+Enter
 - [ ] Add `ForceNarratorRead()` - **Caps+Tab** for first element (cần đợi 1s trước khi gửi phím để tránh bị lặp)
 - [ ] Verify compilation
 
