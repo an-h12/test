@@ -30,9 +30,8 @@ digraph NarratorCaptureWorkflow {
     capture [shape=box, label="DoNarratorCapture()\n(Caps+Ctrl+X)"];
     get_clipboard [shape=box, label="GetClipboardText()"];
     filter [shape=box, label="FilterNarratorOutput()"];
-    clear_history [shape=box, label="ClearClipboardHistory()"];
+    clear_current [shape=box, label="ClearCurrentClipboard()\n(Clipboard.Clear)"];
     restore [shape=box, label="RestoreNarratorState()"];
-
     end [shape=doublecircle, label="End"];
 
     start -> ensure_narrator;
@@ -42,11 +41,40 @@ digraph NarratorCaptureWorkflow {
     force_read -> capture;
     capture -> get_clipboard;
     get_clipboard -> filter;
-    filter -> clear_history;
-    clear_history -> restore;
+    filter -> clear_current;
+    clear_current -> restore;
     restore -> end;
 }
 ```
+
+### Workflow Diagram - Test Loop (MainForm.getObjectInScreenPC)
+
+```dot
+digraph TestLoopWorkflow {
+    rankdir=TB;
+    start_loop [shape=doublecircle, label="Start Loop"];
+
+    change_focus [shape=box, label="changeFocus()\n(TAB key)"];
+    narrator_output [shape=box, label="getNarratorOutput()\n(Capture + ClearCurrentClipboard)"];
+    process_object [shape=box, label="Process Object"];
+    check_exit [shape=diamond, label="Exit\nConditions?"];
+    end_loop [shape=doublecircle, label="End Loop"];
+
+    clear_history_python [shape=box, label="ClearClipboardHistoryViaPython()\n(WinRT.clear_history)"];
+
+    start_loop -> change_focus;
+    change_focus -> narrator_output;
+    narrator_output -> process_object;
+    process_object -> check_exit;
+    check_exit -> change_focus [label="Continue"];
+    check_exit -> clear_history_python [label="Exit"];
+    clear_history_python -> end_loop;
+}
+```
+
+**Workflow chi tiết:**
+1. **Trong vòng lặp**: Mỗi lần gọi `getNarratorOutput()` sẽ dùng `Clipboard.Clear()` để xóa nhanh nội dung hiện tại
+2. **Khi thoát vòng lặp**: Gọi Python để xóa clipboard history hoàn toàn qua WinRT
 
 ### Required Functions (Python → C# Naming)
 
@@ -60,7 +88,8 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 | `_do_narrator_capture()` | `DoNarratorCapture()` | pc_output_narrator.py | Main capture logic (Caps+Ctrl+X) |
 | `capture_narrator_last_spoken()` | `CaptureNarratorLastSpoken()` | pc_output_narrator.py | Full capture workflow |
 | `_strip_narrator_confirmation()` | `FilterNarratorOutput()` | pc_output_narrator.py | Remove "copied to clipboard" messages |
-| `clear_clipboard_history()` | `ClearClipboardHistory()` | pc_output_narrator.py | Clear Win+V clipboard history |
+| `clear_clipboard_history()` | `ClearClipboardHistoryViaPython()` | pc_output_narrator.py | Clear full history (on exit) - gọi Python |
+| **`N/A`** | **`ClearCurrentClipboard()`** | System.Windows.Forms.Clipboard | Clear current clipboard (in-loop) |
 | `send_key_event()` | `SendKeyEvent()` | pc_keys.py | Send single key |
 | `send_key_chord()` | `SendKeyChord()` | pc_keys.py | Send multiple keys |
 
@@ -98,16 +127,19 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 
 **Note:** Using `SendKeys.SendWait()` instead of Win32 SendInput - already available via System.Windows.Forms
 
-### Task 3: Add Clipboard Operations (Win32 P/Invoke)
+### Task 3: Add Clipboard Operations
 
 **Files:**
 - Modify: `TalkBackAutoTest/PCTB.cs`
 
 **Steps:**
-- [ ] Add `GetClipboardText()` - open, read, close clipboard (Win32)
+- [ ] Add `GetClipboardText()` - open, read, close clipboard (Win32 hoặc Clipboard class)
 - [ ] Add `GetClipboardSequenceNumber()` - track clipboard changes (Win32)
-- [ ] Add `ClearClipboardHistory()` - clear clipboard history (Win+V)
+- [ ] Add `ClearCurrentClipboard()` - xóa nội dung hiện tại (System.Windows.Forms.Clipboard.Clear())
+- [ ] Add `ClearClipboardHistoryViaPython()` - gọi Python/WinRT để xóa full history
 - [ ] Verify compilation
+
+**Note:** Sử dụng `Clipboard.Clear()` cho trong vòng lặp, gọi Python cho khi thoát.
 
 ### Task 4: Add Narrator Process Management
 
@@ -132,7 +164,7 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 - [ ] Add `FilterNarratorOutput(string text)` - remove "copied to clipboard" messages
 - [ ] Add `DoNarratorCapture()` - main capture logic with Caps+Ctrl+X
 - [ ] Add `TryNarratorCapture()` - with retry logic
-- [ ] Add `CaptureNarratorLastSpoken()` - full workflow: ForceNarratorRead() → DoNarratorCapture() → GetClipboardText() → FilterNarratorOutput() → ClearClipboardHistory()
+- [ ] Add `CaptureNarratorLastSpoken()` - full workflow: ForceNarratorRead() → DoNarratorCapture() → GetClipboardText() → FilterNarratorOutput() → **ClearCurrentClipboard()**
 - [ ] Verify compilation
 
 ### Task 6: Add Main Public API
@@ -156,13 +188,24 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 - [ ] Copy KEYBDINPUT, INPUT structures from pc_keys.py to pc_output_narrator.py
 - [ ] Copy Win32 API declarations (SendInput, GetAsyncKeyState) from pc_keys.py to pc_output_narrator.py
 - [ ] Copy all keyboard functions (send_key_event, send_key_chord, toggle_narrator, force_narrator_read) from pc_keys.py to pc_output_narrator.py
-- [ ] Update `capture_narrator_last_spoken()` to follow new flow: ForceNarratorRead() → DoNarratorCapture() → GetClipboardText() → FilterNarratorOutput() → ClearClipboardHistory()
+- [ ] Update `capture_narrator_last_spoken()` to follow new flow: ForceNarratorRead() → DoNarratorCapture() → GetClipboardText() → FilterNarratorOutput() → **KHÔNG gọi clear_clipboard_history()** (C# sẽ tự xử lý)
 - [ ] Add 1 second delay in `force_narrator_read()` before sending keys (already done in Python)
 - [ ] Update imports in pc_output_narrator.py to use local functions instead of pc_keys
+- [ ] Keep `clear_clipboard_history()` function for external use (called by C# when needed)
 - [ ] Verify Python code still works
 - [ ] Commit
 
-### Task 8: Testing
+### Task 8: Update MainForm to Call Python on Exit
+
+**Files:**
+- Modify: `TalkBackAutoTest/MainForm.cs`
+
+**Steps:**
+- [ ] In `getObjectInScreenPC()`, add call to `ClearClipboardHistoryViaPython()` when exiting loop
+- [ ] Exit conditions: `i == 10` or `o == null`
+- [ ] Verify compilation
+
+### Task 9: Testing
 
 **Files:**
 - Test: Manual testing in application
@@ -172,6 +215,7 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 - [ ] Ensure Narrator is OFF
 - [ ] Call `PCManager.GetNarratorOutput()` (via test button or breakpoint)
 - [ ] Verify: Narrator auto-turns ON → element captured → clipboard cleared → Narrator restored to OFF
+- [ ] Verify clipboard history is cleared after test loop exits
 
 ---
 
