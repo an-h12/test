@@ -474,7 +474,35 @@ namespace TalkBackAutoTest
 
         public void getNarratorOutput()
         {
-            System.Console.Write("Ongoing getNarratorOutput");
+            //System.Console.Write("Ongoing getNarratorOutput");
+            try
+            {
+                var response = client.GetAsync(BaseUrl + "/api/narrator/output").Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string json = response.Content.ReadAsStringAsync().Result;
+                    dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
+
+                    if (data.success == "True" && data.text != null)
+                    {
+                        string narratorText = data.text.ToString();
+                        System.Console.Write("Narrator Output: " + narratorText);
+                    }
+                    else
+                    {
+                        System.Console.Write("Narrator Output: (empty or failed)");
+                    }
+                }
+                else
+                {
+                    System.Console.Write("Failed to get Narrator output: " + response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Console.Write("Lỗi khi lấy Narrator output: " + ex.Message);
+            }
         }
         #endregion narrator
 

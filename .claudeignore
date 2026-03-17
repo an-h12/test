@@ -1,0 +1,54 @@
+# Claude Code ignore patterns
+# Based on .gitignore - adapted for Claude operations
+
+# Build outputs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# IDE and editor directories
+.vs/
+.vscode/
+.idea/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# AI agent directories
+.agents/
+.claude/
+.gemini/
+.codex/
+.cline/
+.clinerules/
+
+# Git directory
+.git/
+
+# Node dependencies
+node_modules/
+
+# Environment files (may contain secrets)
+.env
+
+# Test results
+[Tt]est[Rr]esult*/
+
+# Coverage reports
+CodeCoverage/
+
+# Log files
+[Ll]og/
+[Ll]ogs/
+
+# OS generated files
+Thumbs.db
+.DS_Store
+
+.env

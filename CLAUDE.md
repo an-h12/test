@@ -13,11 +13,35 @@
 - `624de5c` - change
 
 ## Key Files
+
+### C# Files (Main)
+| File | Lines | Purpose |
+|------|-------|---------|
+| `TalkBackAutoTest/MainForm.cs` | 8951 | Main UI form - rất lớn |
+| `TalkBackAutoTest/PCTB.cs` | 1051 | Core functionality - gọi API điều khiển Windows UI |
+| `TalkBackAutoTest/Object.cs` | - | Data model cho test objects |
+| `TalkBackAutoTest/DeviceInfo.cs` | - | Device information model |
+| `TalkBackAutoTest/UIAppInfo.cs` | - | UI Application info model |
+| `TalkBackAutoTest/AObject.cs` | - | Abstract object model |
+| `TalkBackAutoTest/AppName.cs` | - | Application name model |
+
+### Python Modules (`TalkBackAutoTest/module/`)
 | File | Purpose |
 |------|---------|
-| `TalkBackAutoTest/MainForm.cs` | Main UI form |
-| `TalkBackAutoTest/PCTB.cs` | Core functionality (778 lines) |
-| `TalkBackAutoTest/module/*.py` | Python automation modules |
+| `pc_cli.py` | CLI interface |
+| `pc_keys.py` | Keyboard input handling |
+| `pc_output_narrator.py` | Narrator output capture |
+| `pc_uia.py` | UI Automation |
+| `pc_element_info.py` | Element information |
+
+## Architecture
+```
+MainForm.cs (8951 lines)
+    ↓ creates instance
+PCTB PCManager = new PCTB();
+    ↓ calls methods → REST API calls
+BaseUrl + "/api/..."
+```
 
 ## Environment Variables Used
 | Variable | Purpose |
