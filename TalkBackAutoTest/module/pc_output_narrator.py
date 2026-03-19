@@ -1,3 +1,7 @@
+# NOTE: A native C# implementation exists in PCTB.cs (TalkBackAutoTest project).
+# This Python file is the reference/backup implementation.
+# Do not modify the Python logic without also updating the C# equivalent.
+
 import ctypes
 from ctypes import wintypes
 import os
@@ -323,7 +327,9 @@ def _strip_narrator_confirmation(text):
 # region Public API
 
 def getNarratorOutput():
-    """Matches C# PCTB.getNarratorOutput() - Capture Narrator text with auto-toggle if needed."""
+    """Matches C# PCTB.getNarratorOutput() - Capture Narrator text with auto-toggle if needed.
+
+    NOTE: Primary implementation is in C# (PCTB.cs). This Python file is kept as reference/backup."""
     auto_enabled = prepare_narrator_capture_session()
     if auto_enabled is None:
         return None

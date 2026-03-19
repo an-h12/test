@@ -2490,6 +2490,11 @@ namespace TalkBackAutoTest
                     PCManager.StartRecordVideo(videoPath);
                     PCManager.cleanLogPC();
 
+                    // i == 1: first element — force Narrator to read it (Caps+Tab, called once)
+                    if (i == 1)
+                    {
+                        PCManager.ForceNarratorRead();
+                    }
                     PCManager.changeFocus();
                     PCManager.StopRecordVideo();
 
@@ -2498,6 +2503,7 @@ namespace TalkBackAutoTest
                     string objElement = PCManager.dumpFocusedObject();
                     PCManager.dumpScreen();
                     PCManager.checkIssue("1", "2");
+                    PCManager.ClearCurrentClipboard();
 
                     PCManager.getObjectScreenShot(@folderResult,pid);
                     PCManager.getLogPC();

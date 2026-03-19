@@ -301,17 +301,18 @@ namespace TalkBackAutoTest
 
 
 
-        //[DllImport("user32.dll")]
-        //private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
+        // Keyboard input via keybd_event (avoids SendKeys Win-key limitation)
+        [DllImport("user32.dll")]
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
-        //private const int VK_TAB = 0x09;
-        //private const int KEYEVENTF_EXTENDEDKEY = 0x0001;
-        //private const int KEYEVENTF_KEYUP = 0x0002;
-        //private const byte VK_CONTROL = 0x11;
-        //private const byte VK_LWIN = 0x5B;
-        //private const byte VK_RETURN = 0x0D;
-
-        //private const string NarratorProcessName = "narrator";
+        private const byte VK_TAB = 0x09;
+        private const byte VK_RETURN = 0x0D;
+        private const byte VK_CONTROL = 0x11;
+        private const byte VK_LWIN = 0x5B;
+        private const byte VK_CAPITAL = 0x14;  // CapsLock
+        private const byte VK_X = 0x58;
+        private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+        private const uint KEYEVENTF_KEYUP = 0x0002;
 
 
         //0903
@@ -348,26 +349,33 @@ namespace TalkBackAutoTest
 
         #region Narattor
 
-        //private void senHotKey()
-        //{
-        //    // Nhấn Ctrl
-        //    keybd_event(VK_CONTROL, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        // --- Keyboard helper ---
+        private void SendKeyChord(byte[] vkCodes, int holdMs)
+        {
+            // Press all keys in order
+            foreach (byte vk in vkCodes)
+                keybd_event(vk, 0, 0, UIntPtr.Zero);
+            System.Threading.Thread.Sleep(holdMs);
+            // Release all keys in reverse order
+            for (int idx = vkCodes.Length - 1; idx >= 0; idx--)
+                keybd_event(vkCodes[idx], 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
 
-        //    // Nhấn Win
-        //    keybd_event(VK_LWIN, 0, KEYEVENTF_EXTENDEDKEY, 0);
+        /// <summary>Toggle Narrator on/off (Win+Ctrl+Enter).</summary>
+        public void ToggleNarrator()
+        {
+            SendKeyChord(new byte[] { VK_CONTROL, VK_LWIN, VK_RETURN }, 100);
+        }
 
-        //    // Nhấn Enter
-        //    keybd_event(VK_RETURN, 0, KEYEVENTF_EXTENDEDKEY, 0);
-
-        //    // Thả Enter
-        //    keybd_event(VK_RETURN, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-
-        //    // Thả Win
-        //    keybd_event(VK_LWIN, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-
-        //    // Thả Ctrl
-        //    keybd_event(VK_CONTROL, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
-        //}
+        /// <summary>
+        /// Force Narrator to read the focused element (Caps+Tab).
+        /// Call once at the start of an automation session for the first element.
+        /// </summary>
+        public void ForceNarratorRead()
+        {
+            System.Threading.Thread.Sleep(1000);
+            SendKeyChord(new byte[] { VK_CAPITAL, VK_TAB }, 100);
+        }
 
         public void StartNarratorNVDA()
         {
@@ -453,56 +461,177 @@ namespace TalkBackAutoTest
             }
         }
 
-        //public bool haveNarratorProcess()
-        //{
-        //    var uiApps = GetRunningUIApplications();
-        //    foreach (UIAppInfo x in uiApps)
-        //    {
-        //        if (x.ProcessName.ToString().ToLower().Contains("narrator"))
-        //        {
-        //            return true;
-        //        }
-        //    }
-        //    return false;
-        //}
-
-        //public bool IsNarratorRunning()
-        //{
-        //    System.Console.Write("Ongoing Check status of Narrator");
-        //    return true;
-        //}
-
-        public void getNarratorOutput()
+        // --- Narrator process management ---
+        /// <summary>Check if Narrator process is currently running.</summary>
+        public bool IsNarratorRunning()
         {
-            //System.Console.Write("Ongoing getNarratorOutput");
+            return Process.GetProcessesByName("Narrator").Length > 0
+                || Process.GetProcessesByName("narrator").Length > 0;
+        }
+
+        /// <summary>Wait up to `retries` * 200ms for Narrator state to match expected.</summary>
+        public bool WaitForNarratorState(bool expected, int retries = 3)
+        {
+            for (int i = 0; i < retries; i++)
+            {
+                if (IsNarratorRunning() == expected) return true;
+                System.Threading.Thread.Sleep(200);
+            }
+            return IsNarratorRunning() == expected;
+        }
+
+        /// <summary>Start Narrator if not already running (toggle-on approach).</summary>
+        public bool StartNarratorProcess()
+        {
+            if (IsNarratorRunning()) return true;
+            ToggleNarrator(); // Win+Ctrl+Enter
+            System.Threading.Thread.Sleep(200);
+            return WaitForNarratorState(true);
+        }
+
+        /// <summary>Ensure Narrator is on; returns true if already on or successfully turned on.</summary>
+        public bool EnsureNarratorOn()
+        {
+            if (IsNarratorRunning()) return true;
+            Console.WriteLine("INFO: Narrator is off; auto-enabling for capture");
+            ToggleNarrator();
+            if (WaitForNarratorState(true)) return true;
+            // Fallback: direct toggle again
+            ToggleNarrator();
+            return WaitForNarratorState(true);
+        }
+
+        /// <summary>
+        /// Restore Narrator to its prior state. Call with autoEnabled=true
+        /// (from EnsureNarratorOn) to toggle it back off if we auto-enabled it.
+        /// </summary>
+        public void RestoreNarratorState(bool autoEnabled)
+        {
+            if (!autoEnabled) return;
+            ToggleNarrator();
+            if (WaitForNarratorState(false))
+                Console.WriteLine("INFO: Narrator restored to previous state (off)");
+            else
+                Console.WriteLine("WARN: Failed to restore Narrator state");
+        }
+
+        // --- Clipboard operations ---
+        /// <summary>Get current clipboard text, or null if unavailable/empty.</summary>
+        public string GetClipboardText()
+        {
             try
             {
-                var response = client.GetAsync(BaseUrl + "/api/narrator/output").Result;
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string json = response.Content.ReadAsStringAsync().Result;
-                    dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
-
-                    if (data.success == "True" && data.text != null)
-                    {
-                        string narratorText = data.text.ToString();
-                        System.Console.Write("Narrator Output: " + narratorText);
-                    }
-                    else
-                    {
-                        System.Console.Write("Narrator Output: (empty or failed)");
-                    }
-                }
-                else
-                {
-                    System.Console.Write("Failed to get Narrator output: " + response.StatusCode);
-                }
+                if (Clipboard.ContainsText())
+                    return Clipboard.GetText();
             }
-            catch (Exception ex)
+            catch { }
+            return null;
+        }
+
+        /// <summary>Clear the current clipboard contents.</summary>
+        public void ClearCurrentClipboard()
+        {
+            try { Clipboard.Clear(); } catch { }
+        }
+
+        // --- Narrator capture helpers ---
+        private string FilterNarratorOutput(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] blocked = new[] {
+                "copied last phrase to clipboard",
+                "failed to copy to clipboard"
+            };
+            var filtered = lines.Where(l => !blocked.Contains(l.Trim().ToLower())).ToArray();
+            return string.Join(Environment.NewLine, filtered);
+        }
+
+        /// <summary>
+        /// Issue Caps+Ctrl+X to trigger Narrator's "copy last spoken phrase".
+        /// Returns raw clipboard text (unfiltered), or null on failure.
+        /// </summary>
+        private string DoNarratorCapture()
+        {
+            // Issue the Narrator copy-last-spoken chord: Caps+Ctrl+X
+            SendKeyChord(new byte[] { VK_CAPITAL, VK_CONTROL, VK_X }, 100);
+
+            // Brief delay for clipboard to populate
+            System.Threading.Thread.Sleep(300);
+
+            string raw = GetClipboardText();
+            if (raw == null) return null;
+            return FilterNarratorOutput(raw);
+        }
+
+        /// <summary>
+        /// Single attempt capture. Logs error and returns null if nothing captured.
+        /// </summary>
+        private string TryNarratorCapture()
+        {
+            string result = DoNarratorCapture();
+            if (result == null)
             {
-                System.Console.Write("Lỗi khi lấy Narrator output: " + ex.Message);
+                Console.WriteLine("Lỗi: Narrator capture thất bại");
             }
+            return result;
+        }
+
+        /// <summary>
+        /// Save current clipboard, issue Narrator copy, restore original clipboard.
+        /// </summary>
+        private string CaptureNarratorLastSpoken()
+        {
+            // Save current clipboard
+            string original = null;
+            bool hadText = false;
+            try
+            {
+                hadText = Clipboard.ContainsText();
+                if (hadText) original = Clipboard.GetText();
+            }
+            catch { }
+
+            // Capture Narrator output
+            string result = TryNarratorCapture();
+
+            // Restore original clipboard
+            try
+            {
+                if (hadText && original != null)
+                    Clipboard.SetText(original);
+            }
+            catch { }
+
+            return result;
+        }
+
+        // --- Public API ---
+        /// <summary>
+        /// Main public method — captures Narrator output with auto toggle-on.
+        /// Auto-disables Narrator if it was off before the call.
+        /// </summary>
+        public string GetNarratorOutput()
+        {
+            bool autoEnabled = EnsureNarratorOn();
+            try
+            {
+                return CaptureNarratorLastSpoken();
+            }
+            finally
+            {
+                RestoreNarratorState(autoEnabled);
+            }
+        }
+
+        /// <summary>
+        /// Capture Narrator output only if it is already running (no auto toggle).
+        /// Returns null if Narrator is not running.
+        /// </summary>
+        public string TryCaptureNarratorIfRunning()
+        {
+            if (!IsNarratorRunning()) return null;
+            return CaptureNarratorLastSpoken();
         }
         #endregion narrator
 
