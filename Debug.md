@@ -190,6 +190,7 @@ Thread.Sleep(5000);                       // delay 5s
 
 // SAU
 string narratorOutput = PCManager.GetNarratorOutput();
+// PCManager.StopRecordVideo();         // tạm comment
 Thread.Sleep(1000);                       // delay 1s
 ```
 
@@ -200,7 +201,46 @@ Object o = PCManager.getFocusedObjectFake(
     narratorOutput ?? "TalkbackText_NA");
 ```
 
+### `PCTB.cs` — `GetNarratorOutput()` (dòng ~632)
+
+**Fix:** Bỏ auto-toggle Narrator — Narrator phải GIỮ BẬT suốt vòng loop:
+```csharp
+public string GetNarratorOutput()
+{
+    if (!IsNarratorRunning())
+    {
+        Console.WriteLine("GetNarratorOutput: Narrator chua bat - bo qua capture");
+        return null;
+    }
+    return CaptureNarratorLastSpoken();
+}
+```
+
 **Lưu ý:** Giảm `Thread.Sleep` từ 5 giây xuống **1 giây** để tăng tốc độ test.
+
+**Luồng hoạt động đúng:**
+```
+Iteration 1:
+  ForceNarratorRead()  → Caps+Tab (đọc phần tử đầu tiên)
+  Sleep(1000)
+  Tab()                → Di chuyển sang phần tử tiếp theo
+  Sleep(1000)
+  GetNarratorOutput() → Caps+Ctrl+X (capture — KHÔNG toggle Narrator)
+  Sleep(1000)
+  dumpFocusedObject() → Lấy thông tin UI element
+
+Iteration 2+:
+  Tab()                → Di chuyển sang phần tử mới (Narrator vẫn bật)
+  Sleep(1000)
+  GetNarratorOutput() → Caps+Ctrl+X (capture — Narrator đang bật suốt)
+  Sleep(1000)
+  dumpFocusedObject() → Lấy thông tin UI element
+
+Narrator state:
+  StartNarratorNVDA()  → bật 1 lần ở RunProjectWithNewThreadPC
+  GetNarratorOutput() → KHÔNG tắt (đã fix)
+  StopNarratorNVDA()  → tắt 1 lần khi kết thúc test
+```
 
 ---
 
@@ -219,6 +259,8 @@ Object o = PCManager.getFocusedObjectFake(
 | 5 | App không activate | `PCTB.cs` | ~688 | Fix `changeFocus` với `keybd_event` fallback |
 | 6 | Talkback Text trống | `PCTB.cs` | ~1100 | Thêm overload `getFocusedObjectFake` với param `talkbackText` |
 | 6 | Talkback Text trống | `MainForm.cs` | ~2501 | Capture Narrator output + truyền vào Object + giảm delay xuống 1s |
+| 6 | Talkback Text trống | `MainForm.cs` | ~2504 | Comment `StopRecordVideo()` (xử lý riêng) |
+| 6 | Talkback Text trống | `PCTB.cs` | ~632 | Fix `GetNarratorOutput()` bỏ auto-toggle — Narrator giữ BẬT suốt vòng loop |
 
 ---
 

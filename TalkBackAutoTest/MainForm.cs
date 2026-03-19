@@ -2501,7 +2501,7 @@ namespace TalkBackAutoTest
 
                     // Capture Narrator output
                     string narratorOutput = PCManager.GetNarratorOutput();
-                    PCManager.StopRecordVideo();
+                    // PCManager.StopRecordVideo();
 
                     Thread.Sleep(1000);
                     string objElement = PCManager.dumpFocusedObject();

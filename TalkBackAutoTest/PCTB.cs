@@ -631,15 +631,14 @@ namespace TalkBackAutoTest
         /// </summary>
         public string GetNarratorOutput()
         {
-            bool autoEnabled = EnsureNarratorOn();
-            try
+            // NOTE: Narrator should already be ON (via StartNarratorNVDA called once at test start).
+            // This method just captures the current Narrator output WITHOUT toggling Narrator on/off.
+            if (!IsNarratorRunning())
             {
-                return CaptureNarratorLastSpoken();
+                Console.WriteLine("GetNarratorOutput: Narrator chua bat - bo qua capture");
+                return null;
             }
-            finally
-            {
-                RestoreNarratorState(autoEnabled);
-            }
+            return CaptureNarratorLastSpoken();
         }
 
         /// <summary>
