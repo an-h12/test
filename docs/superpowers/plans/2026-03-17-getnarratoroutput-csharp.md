@@ -6,11 +6,7 @@
 
 **Architecture:** All code integrated directly into PCTB.cs inside `#region Narrator` as static helper methods with Win32 P/Invoke declarations. Python backup file will be updated to match same logic.
 
-**Tech Stack:** C# .NET Framework 4.8, System.Windows.Forms.SendKeys, Win32 Clipboard API
-
----
-
-## Context
+**Tech Stack:** C# .NET Framework 4.5, System.Windows.Forms.SendKeys, Win32 Clipboard API
 
 ### Problem Statement
 - Currently `getNarratorOutput()` in PCTB.cs calls Python CLI via HTTP API
@@ -89,6 +85,38 @@ digraph TestLoopWorkflow {
    - Lần đầu: TAB → ForceNarratorRead() → Capture → checkIssue() → ClearCurrentClipboard()
    - Các lần tiếp theo: TAB → Capture → checkIssue() → ClearCurrentClipboard()
 
+### How Narrator is Started
+
+**Critical: Narrator has no "Start" method — it is toggled via keyboard shortcut.**
+
+Narrator is not a regular application you launch and leave running. It is a **toggle** — the same shortcut that starts it also stops it:
+
+| Action | Shortcut | Notes |
+|--------|----------|-------|
+| Toggle Narrator **ON/OFF** | `Win + Ctrl + Enter` | Python: `toggle_narrator()` = `SendKeyChord([Ctrl, Win, Return])` |
+| Force Narrator **read** current element + copy to clipboard | `Caps Lock + Tab` | Only works when Narrator is already ON |
+| Narrator **capture** current element to clipboard | `Caps Lock + Ctrl + X` | Only works when Narrator is already ON |
+
+**Key insight:** `StartNarratorProcess()` does NOT start Narrator. It calls `ToggleNarrator()` (Win+Ctrl+Enter) to **turn Narrator on**. If Narrator is already on, `ToggleNarrator()` turns it off — so we must check `IsNarratorRunning()` first.
+
+### Narrator Startup Flow (Correct Implementation)
+
+```
+1. IsNarratorRunning() → false?
+   └── SendKeyChord([Ctrl, Win, Return])  ← toggle ON (Caps+Ctrl+X hotkey only works when Narrator is ON)
+2. Wait ~200ms
+3. IsNarratorRunning() → true? → proceed
+   └── false? → retry up to 3x with backoff
+```
+
+### Startup Mechanism Comparison
+
+| Approach | Method | Pros | Cons |
+|----------|--------|------|------|
+| ~~Launch Narrator.exe directly~~ | `Process.Start("narrator.exe")` | ✅ Simple | ❌ Narrator is toggle — launching when already ON turns it OFF |
+| ✅ **Toggle via hotkey** | `SendKeyChord([Ctrl, Win, Return])` | ✅ Reliable, matches user behavior | ⚠️ Must check state first |
+| Settings API | `SystemParametersInfo(SPI_GETSCREENREADER)` | ✅ Query-only, no side effects | ❌ Read-only — cannot change Narrator state |
+
 ### Required Functions (Python → C# Naming)
 
 All functions will be implemented inside `#region Narrator` in PCTB.cs
@@ -132,21 +160,27 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 - [ ] Verify compilation
 - [ ] *(Các hàm khác sẽ implement sau nếu cần)*
 
-**Note:** Using SendKeys.SendWait() for keyboard (no P/Invoke needed). Clipboard operations dùng System.Windows.Forms.Clipboard có sẵn.
+**Note:** Keyboard input uses Win32 SendInput via P/Invoke (see Task 2). Clipboard operations use `System.Windows.Forms.Clipboard` — no extra P/Invoke needed.
 
-### Task 2: Add Keyboard Input Methods (using SendKeys.SendWait)
+### Task 2: Add Keyboard Input Methods (Win32 SendInput via P/Invoke)
 
 **Files:**
 - Modify: `TalkBackAutoTest/PCTB.cs`
 
-**Steps:**
-- [ ] Add `SendKeyEvent(int vkCode)` - Send single key using SendKeys
-- [ ] Add `SendKeyChord(string keyCombo)` - Send key combination using SendKeys format
-- [ ] Add `ToggleNarrator()` - Ctrl+Win+Enter
-- [ ] Add `ForceNarratorRead()` - **Caps+Tab** for first element (cần đợi 1s trước khi gửi phím để tránh bị lặp)
-- [ ] Verify compilation
+**Context:**
+- **SendKeys does NOT support the Win key (VK_LWIN)** — `SendKeys.SendWait()` cannot send `Win+...` shortcuts
+- Must use **Win32 `SendInput`** via P/Invoke (same approach as Python's `send_key_event()` in `pc_keys.py`)
+- Import `SendInput`, `GetAsyncKeyState` from `user32.dll`
+- .NET 4.5 does not have `User32.SendInput` built-in — declare it with `[DllImport("user32.dll")]`
 
-**Note:** Using `SendKeys.SendWait()` instead of Win32 SendInput - already available via System.Windows.Forms
+**Steps:**
+- [ ] Add Win32 P/Invoke declarations: `SendInput`, `GetAsyncKeyState`
+- [ ] Add `KEYBDINPUT` and `INPUT` structs (same as Python pc_keys.py)
+- [ ] Add `SendKeyEvent(int vkCode)` - Send single key using SendInput
+- [ ] Add `SendKeyChord(int[] vkCodes, double holdTime)` - Send key combination using SendInput
+- [ ] Add `ToggleNarrator()` - `SendKeyChord([VK_CONTROL, VK_LWIN, VK_RETURN], 0.1s)` (same as Python `toggle_narrator()`)
+- [ ] Add `ForceNarratorRead()` - **Caps+Tab** for first element (sleep 1s before sending to avoid repeat)
+- [ ] Verify compilation
 
 ### Task 3: Add Clipboard Operations
 
@@ -169,13 +203,41 @@ All functions will be implemented inside `#region Narrator` in PCTB.cs
 **Files:**
 - Modify: `TalkBackAutoTest/PCTB.cs`
 
+**Context:**
+- **CRITICAL: Narrator is a toggle — `StartNarratorProcess()` calls `ToggleNarrator()` (Win+Ctrl+Enter), NOT `Process.Start("narrator.exe")`**
+- Launching narrator.exe directly when Narrator is already ON will turn it OFF
+- Always use keyboard shortcut to toggle Narrator state
+
 **Steps:**
-- [ ] Add `IsNarratorRunning()` - iterate Process.GetProcesses() or use SPI_GETSCREENREADER
-- [ ] Add `WaitForNarratorState(bool expectedRunning)` - retry with backoff
-- [ ] Add `StartNarratorProcess()` - launch Narrator.exe
-- [ ] Add `EnsureNarratorOn()` - auto-enable if off, returns bool? (null if failed)
-- [ ] Add `RestoreNarratorState(bool? autoEnabled)` - restore previous state
+- [ ] Add `IsNarratorRunning()` - check `Process.GetProcessesByName("Narrator")` for Narrator.exe
+- [ ] Add `WaitForNarratorState(bool expectedRunning)` - retry with 200ms backoff, max 3 attempts
+- [ ] Add `StartNarratorProcess()` — **FIXED**: Send hotkey `Win+Ctrl+Enter` via `SendKeyChord()` to toggle Narrator ON
+  ```csharp
+  // CORRECT: toggle via shortcut (Win+Ctrl+Enter)
+  SendKeyChord("^(%){ENTER}");  // Ctrl+Alt+Enter in SendKeys format
+  // OR use Win32 SendInput equivalent in C#
+  SendKeyChord(ctrl: true, win: true, key: RETURN);
+
+  // WRONG: Process.Start("narrator.exe") — DON'T DO THIS
+  ```
+- [ ] Add `EnsureNarratorOn()` - check IsNarratorRunning(), call StartNarratorProcess() if off, return bool
+- [ ] Add `RestoreNarratorState(bool? autoEnabled)` - if autoEnabled==true (we started it), call ToggleNarrator() to turn it off
 - [ ] Verify compilation
+
+**Key code pattern:**
+```csharp
+public bool StartNarratorProcess() {
+    // Narrator is a toggle — only send if not already running
+    if (IsNarratorRunning()) return true;
+
+    // Send Win+Ctrl+Enter to toggle Narrator ON
+    SendKeyChord(VK_CONTROL, VK_LWIN, VK_RETURN, NARRATOR_TOGGLE_HOLD);
+
+    // Wait for Narrator to initialize
+    System.Threading.Thread.Sleep(200);
+    return WaitForNarratorState(expectedRunning: true);
+}
+```
 
 ### Task 5: Add Capture Implementation
 

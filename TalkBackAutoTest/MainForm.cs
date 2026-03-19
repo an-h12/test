@@ -2494,12 +2494,16 @@ namespace TalkBackAutoTest
                     if (i == 1)
                     {
                         PCManager.ForceNarratorRead();
+                        Thread.Sleep(1000);
                     }
                     PCManager.changeFocus();
+                    Thread.Sleep(1000);
+
+                    // Capture Narrator output
+                    string narratorOutput = PCManager.GetNarratorOutput();
                     PCManager.StopRecordVideo();
 
-                    PCManager.getNarratorOutput();
-                    Thread.Sleep(5000);
+                    Thread.Sleep(1000);
                     string objElement = PCManager.dumpFocusedObject();
                     PCManager.dumpScreen();
                     PCManager.checkIssue("1", "2");
@@ -2510,7 +2514,7 @@ namespace TalkBackAutoTest
 
 
 
-                    Object o = PCManager.getFocusedObjectFake(numberOfObject + 1, objElement, windowTitle, pkgInfo);
+                    Object o = PCManager.getFocusedObjectFake(numberOfObject + 1, objElement, windowTitle, pkgInfo, narratorOutput ?? "TalkbackText_NA");
                     if (o == null)
                     {
                         return;
@@ -2522,7 +2526,7 @@ namespace TalkBackAutoTest
                         listObject.Add(o);
                         updateXML();
                         //syncHashMap(o);
-                    }   
+                    }
 
                 }
                 catch (Exception ex)
@@ -3636,6 +3640,7 @@ namespace TalkBackAutoTest
 
                     threadRunProject = new Thread(RunProjectWithNewThreadPC);
                     threadRunProject.Name = "Run Project with new Thread";
+                    threadRunProject.SetApartmentState(ApartmentState.STA); // Required for Clipboard/OLE calls
                     if (!threadRunProject.IsAlive)
                         threadRunProject.Start();
 
@@ -8846,28 +8851,29 @@ namespace TalkBackAutoTest
 
         }
 
-        private void updateListApponComboBox(UIAppInfo x =null)
+        private void updateListApponComboBox(UIAppInfo x = null)
         {
             try
             {
+                // Reset binding hoàn toàn trước khi thay đổi
                 cbPClistApp.DataSource = null;
                 cbPClistApp.Items.Clear();
+                cbPClistApp.DisplayMember = null;
+                cbPClistApp.ValueMember = null;
+
                 List<UIAppInfo> listApp = PCManager.GetRunningUIApplications();
+
+                if (listApp == null || listApp.Count == 0)
+                {
+                    printLog("Không tìm thấy app nào đang chạy.");
+                    return;
+                }
+
                 cbPClistApp.DataSource = listApp;
                 cbPClistApp.DisplayMember = "DisplayText"; // Hiển thị ProcessName - WindowTitle
                 cbPClistApp.ValueMember = "ProcessId";     // Giá trị thực là ProcessId
 
-                // Thêm sự kiện khi chọn item
-                cbPClistApp.SelectedIndexChanged += (sender1, e1) =>
-                {
-                    var selectedItem = cbPClistApp.SelectedItem as UIAppInfo;
-                    if (selectedItem != null)
-                    {
-                        printLog(string.Format("Đã chọn: {0}\nID: {1}",
-                            selectedItem.ProcessName,
-                            selectedItem.ProcessId));
-                    }
-                };
+                printLog(string.Format("Đã tìm thấy {0} app đang chạy.", listApp.Count));
 
                 if (x != null)
                 {
@@ -8877,9 +8883,8 @@ namespace TalkBackAutoTest
             }
             catch (Exception ex)
             {
-                printLog(ex.Message);
+                printLog("Lỗi updateListApponComboBox: " + ex.Message);
             }
-
         }
 
 

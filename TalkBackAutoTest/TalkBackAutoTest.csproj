@@ -11,6 +11,7 @@
     <AssemblyName>TalkBackAutoTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+	<RuntimeIdentifiers>win</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -38,27 +39,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BetterFolderBrowser">
-      <HintPath>..\..\SSM_GenerateInputData\SSM_GenerateInputData\bin\Debug\BetterFolderBrowser.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack">
-      <HintPath>..\..\..\..\F_Folder\2019\PROJECT_GIT\DAT\PC_AUTOMATION\bin\Debug\Microsoft.WindowsAPICodePack.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.Shell">
-      <HintPath>..\..\..\..\F_Folder\2019\PROJECT_GIT\DAT\PC_AUTOMATION\bin\Debug\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\F_Folder\2019\PROJECT_GIT\LeakActivity\Leak Activity\bin\Debug\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="NPOI">
-      <HintPath>Install-Package NPOI</HintPath>
-    </Reference>
-    <Reference Include="NPOI.OOXML">
-      <HintPath>C:\SCS\AutoPenUpHealth\AutoPenUpHealth\bin\Debug\NPOI.OOXML.dll</HintPath>
-    </Reference>
-    <Reference Include="NPOI.OpenXmlFormats">
-      <HintPath>C:\SCS\AutoPenUpHealth\AutoPenUpHealth\bin\Debug\NPOI.OpenXmlFormats.dll</HintPath>
-    </Reference>
+	 <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3"
+					   PrivateAssets="All" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
@@ -71,8 +53,13 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Resources.Extensions" />
     <Reference Include="UIAutomationClient" />
     <Reference Include="UIAutomationTypes" />
+    <PackageReference Include="BetterFolderBrowser" Version="1.2.0" />
+    <PackageReference Include="Microsoft.WindowsAPICodePack-Shell" Version="1.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NPOI" Version="2.5.6" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActivityForm.cs">
@@ -102,8 +89,6 @@
     <Compile Include="GuideForm.Designer.cs">
       <DependentUpon>GuideForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="HttpClient.cs" />
-    <Compile Include="INPUT.cs" />
     <Compile Include="TBHelper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -171,7 +156,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\talbackIcon.PNG" />
     <None Include="Resources\down.JPG" />
     <None Include="Resources\left.JPG" />
     <None Include="Resources\right.png" />
@@ -181,8 +165,6 @@
     <None Include="Resources\icons8-button-96.png" />
     <None Include="Resources\anh1.jpg" />
     <None Include="Resources\icons8-microsoft-excel-48.png" />
-    <None Include="Resources\a2.png" />
-    <None Include="Resources\tb1.png" />
     <Content Include="voice.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

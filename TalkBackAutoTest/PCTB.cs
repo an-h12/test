@@ -118,30 +118,36 @@ namespace TalkBackAutoTest
 
         public string getWindowTitle(int pId)
         {
-            string windowTitle = "";
+            // Try API first
+            if (!string.IsNullOrEmpty(BaseUrl))
+            {
+                try
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        string json = client.DownloadString(BaseUrl + "/api/window/title?pid=" + pId);
+                        dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
+                        if (data.success == "true")
+                        {
+                            return data.window_title.ToString();
+                        }
+                    }
+                }
+                catch { /* Fall through */ }
+            }
+
+            // Fallback: Get from Process
             try
             {
-                using (WebClient client = new WebClient())
+                Process process = Process.GetProcessById(pId);
+                if (process != null && !string.IsNullOrEmpty(process.MainWindowTitle))
                 {
-                    string json = client.DownloadString(BaseUrl + "/api/window/title?pid="+pId);
-
-                    dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
-
-                    if (data.success == "true")
-                    {
-                        windowTitle = data.window_title.ToString();
-                        return windowTitle;
-                    }
-
-
-                    return windowTitle;
+                    return process.MainWindowTitle;
                 }
             }
-            catch (Exception ex)
-            {
-                return windowTitle;
-            }
+            catch { }
 
+            return "";
         }
 
 
@@ -232,69 +238,59 @@ namespace TalkBackAutoTest
         {
             try
             {
-                using (WebClient client = new WebClient())
+                // Try API first if BaseUrl is available
+                if (!string.IsNullOrEmpty(BaseUrl))
                 {
-                    string json = client.DownloadString(BaseUrl + "/api/window/activate?pid=" + pid.ToString());
-                    var response = JsonConvert.DeserializeObject<ApiResponse>(json);
-
-                    if (response.success)
+                    try
                     {
-                        return true;
+                        using (WebClient client = new WebClient())
+                        {
+                            string json = client.DownloadString(BaseUrl + "/api/window/activate?pid=" + pid.ToString());
+                            var response = JsonConvert.DeserializeObject<ApiResponse>(json);
+                            if (response.success) return true;
+                        }
                     }
+                    catch { /* Fall through to Windows API */ }
+                }
 
+                // Fallback: Windows API
+                Process process = Process.GetProcessById(pid);
+                if (process == null || process.MainWindowHandle == IntPtr.Zero)
+                {
+                    Console.WriteLine("ActivateWindowByPID: Process " + pid + " not found or has no window.");
                     return false;
                 }
+
+                IntPtr hWnd = process.MainWindowHandle;
+
+                // Restore if minimized
+                if (IsIconic(hWnd))
+                {
+                    ShowWindow(hWnd, SW_RESTORE);
+                    System.Threading.Thread.Sleep(200);
+                }
+                else
+                {
+                    ShowWindow(hWnd, SW_SHOW);
+                }
+
+                // Bring to foreground
+                SetForegroundWindow(hWnd);
+                System.Threading.Thread.Sleep(100);
+
+                Console.WriteLine("ActivateWindowByPID: Da kich hoat cua so PID " + pid);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                Console.WriteLine("ActivateWindowByPID: Khong tim thay process PID " + pid);
+                return false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Lỗi: " + ex.Message);
+                Console.WriteLine("ActivateWindowByPID loi: " + ex.Message);
                 return false;
             }
-
-            //try
-            //{
-            //    // Lấy process từ PID
-            //    Process process = Process.GetProcessById(pid);
-
-            //    // Kiểm tra xem process có cửa sổ chính không
-            //    if (process.MainWindowHandle == IntPtr.Zero)
-            //    {
-            //        Console.WriteLine("Process {pid} không có cửa sổ chính.");
-            //        return false;
-            //    }
-
-            //    IntPtr hWnd = process.MainWindowHandle;
-
-            //    // Nếu cửa sổ đang minimized, khôi phục lại
-            //    if (IsIconic(hWnd))
-            //    {
-            //        ShowWindow(hWnd, SW_RESTORE);
-            //    }
-            //    else
-            //    {
-            //        // Hiển thị cửa sổ
-            //        ShowWindow(hWnd, SW_SHOW);
-            //    }
-
-            //    // Đưa cửa sổ lên foreground
-            //    SetForegroundWindow(hWnd);
-
-            //    // Set làm cửa sổ active
-            //    SetActiveWindow(hWnd);
-
-            //    Console.WriteLine("Đã kích hoạt cửa sổ cho PID: {pid}");
-            //    return true;
-            //}
-            //catch (ArgumentException)
-            //{
-            //    Console.WriteLine("Không tìm thấy process với PID: {pid}");
-            //    return false;
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine("Lỗi khi kích hoạt cửa sổ: {ex.Message}");
-            //    return false;
-            //}
         }
 
 
@@ -304,6 +300,27 @@ namespace TalkBackAutoTest
         // Keyboard input via keybd_event (avoids SendKeys Win-key limitation)
         [DllImport("user32.dll")]
         private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern int SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+
+        private const int SW_RESTORE = 9;
+        private const int SW_SHOW = 5;
 
         private const byte VK_TAB = 0x09;
         private const byte VK_RETURN = 0x0D;
@@ -347,9 +364,9 @@ namespace TalkBackAutoTest
         }
         //end0903
 
-        #region Narattor
+        #region Narrator
 
-        // --- Keyboard helper ---
+        // --- Keyboard---
         private void SendKeyChord(byte[] vkCodes, int holdMs)
         {
             // Press all keys in order
@@ -379,39 +396,41 @@ namespace TalkBackAutoTest
 
         public void StartNarratorNVDA()
         {
-
             if (TalkBackAutoTest.Properties.Settings.Default.pcmethodouput == 1)//narrator
             {
-                //UIAutomationHelper.GetUIDumpForAppById(26164);
-                //if (haveNarratorProcess() == false)
-                //{
-                //    System.Console.Write("Ongoing Start Narrator");
-                //    System.Threading.Thread.Sleep(5000);
-                //    senHotKey();
-                //    System.Threading.Thread.Sleep(20000);
-                //}
-                //else
-                //{
-                //    System.Console.Write("Existed Narrator");
-                //}
-
-                try
+                // Try API first
+                if (!string.IsNullOrEmpty(BaseUrl))
                 {
-                    var content = new StringContent("", Encoding.UTF8, "application/json");
-                    var response = client.PostAsync(BaseUrl + "/api/narrator/start", content).Result; // Blocking
-
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        string json = response.Content.ReadAsStringAsync().Result; // Blocking
-                        dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
-                        //return data.success;
+                        var content = new StringContent("", Encoding.UTF8, "application/json");
+                        var response = client.PostAsync(BaseUrl + "/api/narrator/start", content).Result;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            Console.WriteLine("StartNarratorNVDA: Da bat Narrator (qua API)");
+                            return;
+                        }
                     }
-                    //return false;
+                    catch { /* Fall through to local */ }
                 }
-                catch (Exception ex)
+
+                // Fallback: Toggle Narrator ON locally
+                if (IsNarratorRunning())
                 {
-                    Console.WriteLine("Lỗi: " + ex.Message);
-                    //return false;
+                    Console.WriteLine("StartNarratorNVDA: Narrator da chay san");
+                }
+                else
+                {
+                    ToggleNarrator(); // Win+Ctrl+Enter
+                    System.Threading.Thread.Sleep(500);
+                    if (IsNarratorRunning())
+                    {
+                        Console.WriteLine("StartNarratorNVDA: Da bat Narrator (local)");
+                    }
+                    else
+                    {
+                        Console.WriteLine("StartNarratorNVDA: Bat Narrator that bai - kiem tra thu cong Win+Ctrl+Enter");
+                    }
                 }
             }
             else
@@ -424,49 +443,48 @@ namespace TalkBackAutoTest
         {
             if (TalkBackAutoTest.Properties.Settings.Default.pcmethodouput == 1)//narrator
             {
-                try
+                // Try API first
+                if (!string.IsNullOrEmpty(BaseUrl))
                 {
-                    var content = new StringContent("", Encoding.UTF8, "application/json");
-                    var response = client.PostAsync(BaseUrl + "/api/narrator/stop", content).Result;
-
-                    if (response.IsSuccessStatusCode)
+                    try
                     {
-                        string json = response.Content.ReadAsStringAsync().Result;
-                        dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
-                        //return data.success;
+                        var content = new StringContent("", Encoding.UTF8, "application/json");
+                        var response = client.PostAsync(BaseUrl + "/api/narrator/stop", content).Result;
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string json = response.Content.ReadAsStringAsync().Result;
+                            dynamic data = JsonConvert.DeserializeObject<dynamic>(json);
+                            //return data.success;
+                        }
+                        //return false;
                     }
-                    //return false;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Lỗi: " + ex.Message);
-                    //return false;
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Lỗi StopNarrator (API): " + ex.Message);
+                    }
+                    return; // exit early after API attempt
                 }
 
-                //if (haveNarratorProcess() == true)
-                //{
-                //    System.Console.Write("Ongoing Stop Narrator");
-                //    System.Threading.Thread.Sleep(3000);
-                //    senHotKey();
-                //    System.Threading.Thread.Sleep(5000);
-                //}
-                //else
-                //{
-                //    System.Console.Write("Stopped Narrator");
-                //}
-            }
-            else
-            {
-                System.Console.Write("Ongoing Stop NVDA");
+                // Fallback: Toggle Narrator OFF locally
+                if (!IsNarratorRunning())
+                {
+                    Console.WriteLine("StopNarratorNVDA: Narrator khong chay");
+                }
+                else
+                {
+                    ToggleNarrator(); // Win+Ctrl+Enter
+                    System.Threading.Thread.Sleep(500);
+                    Console.WriteLine("StopNarratorNVDA: Da tat Narrator (local)");
+                }
             }
         }
 
-        // --- Narrator process management ---
+        // Narrator process
         /// <summary>Check if Narrator process is currently running.</summary>
         public bool IsNarratorRunning()
         {
-            return Process.GetProcessesByName("Narrator").Length > 0
-                || Process.GetProcessesByName("narrator").Length > 0;
+            return Process.GetProcessesByName("Narrator").Length > 0 || Process.GetProcessesByName("narrator").Length > 0;
         }
 
         /// <summary>Wait up to `retries` * 200ms for Narrator state to match expected.</summary>
@@ -515,7 +533,7 @@ namespace TalkBackAutoTest
                 Console.WriteLine("WARN: Failed to restore Narrator state");
         }
 
-        // --- Clipboard operations ---
+        // --- Clipboard ---
         /// <summary>Get current clipboard text, or null if unavailable/empty.</summary>
         public string GetClipboardText()
         {
@@ -531,10 +549,10 @@ namespace TalkBackAutoTest
         /// <summary>Clear the current clipboard contents.</summary>
         public void ClearCurrentClipboard()
         {
-            try { Clipboard.Clear(); } catch { }
+            Clipboard.Clear();
         }
 
-        // --- Narrator capture helpers ---
+        // FilterOutput
         private string FilterNarratorOutput(string text)
         {
             if (string.IsNullOrEmpty(text)) return text;
@@ -549,14 +567,14 @@ namespace TalkBackAutoTest
 
         /// <summary>
         /// Issue Caps+Ctrl+X to trigger Narrator's "copy last spoken phrase".
-        /// Returns raw clipboard text (unfiltered), or null on failure.
+        /// Returns raw clipboard text (unfiltered)
         /// </summary>
         private string DoNarratorCapture()
         {
-            // Issue the Narrator copy-last-spoken chord: Caps+Ctrl+X
+            //Caps+Ctrl+X
             SendKeyChord(new byte[] { VK_CAPITAL, VK_CONTROL, VK_X }, 100);
 
-            // Brief delay for clipboard to populate
+            // Brief delay for clipboard (có thể bỏ)
             System.Threading.Thread.Sleep(300);
 
             string raw = GetClipboardText();
@@ -671,38 +689,31 @@ namespace TalkBackAutoTest
 
         public void changeFocus()
         {
-            //System.Console.Write("Ongoing changeFocus");
+            // Try API first if available
+            if (!string.IsNullOrEmpty(BaseUrl))
+            {
+                try
+                {
+                    var requestBody = new { count = 1 };
+                    string json = JsonConvert.SerializeObject(requestBody);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = client.PostAsync(BaseUrl + "/api/ui/send_tab", content).Result;
+                    if (response.IsSuccessStatusCode) return;
+                }
+                catch { /* Fall through */ }
+            }
 
-            //keybd_event(VK_TAB, 0, KEYEVENTF_EXTENDEDKEY, 0);
-            //// Thả Ctrl
-            //keybd_event(VK_TAB, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+            // Fallback: Send Tab key via Windows API
             try
             {
-                var requestBody = new
-                {
-                    count = 1
-                };
-
-                string json = JsonConvert.SerializeObject(requestBody);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = client.PostAsync(BaseUrl + "/api/ui/send_tab", content).Result;
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseJson = response.Content.ReadAsStringAsync().Result;
-                    dynamic data = JsonConvert.DeserializeObject<dynamic>(responseJson);
-                    //return data.success;
-                }
-
-                //return false;
+                keybd_event(VK_TAB, 0, 0, UIntPtr.Zero);         // Press Tab
+                System.Threading.Thread.Sleep(50);
+                keybd_event(VK_TAB, 0, KEYEVENTF_KEYUP, UIntPtr.Zero); // Release Tab
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Lỗi khi gửi TAB: " + ex.Message);
-                //return false;
+                Console.WriteLine("changeFocus loi: " + ex.Message);
             }
-
         }
 
         public void dumpScreen()
@@ -729,31 +740,128 @@ namespace TalkBackAutoTest
 
         public string dumpFocusedObject()
         {
-            //System.Console.Write("Ongoing dumpFocusedObject");
+            return dumpFocusedObject(IntPtr.Zero);
+        }
 
+        /// <summary>
+        /// Get the focused UI element from a specific window using UI Automation.
+        /// Falls back to Windows API if no window handle is available.
+        /// Returns a JSON-like string with element info.
+        /// </summary>
+        public string dumpFocusedObject(IntPtr windowHandle)
+        {
             try
             {
-                var response = client.GetAsync(BaseUrl + "/api/ui/focused_element").Result;
-
-                if (response.IsSuccessStatusCode)
+                // Try API first (if BaseUrl is set)
+                if (!string.IsNullOrEmpty(BaseUrl))
                 {
-                    string json = response.Content.ReadAsStringAsync().Result;
-                    var data = JsonConvert.DeserializeObject<dynamic>(json);
-
-                    if (data.success=="True" && data.element != null)
+                    try
                     {
-                        return data.element.ToString();
+                        var response = client.GetAsync(BaseUrl + "/api/ui/focused_element").Result;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            string json = response.Content.ReadAsStringAsync().Result;
+                            var data = JsonConvert.DeserializeObject<dynamic>(json);
+                            if (data.success == "True" && data.element != null)
+                            {
+                                return data.element.ToString();
+                            }
+                        }
                     }
+                    catch { /* Fall through to UI Automation */ }
                 }
 
-                return "NA";
+                // Fallback: Use UI Automation directly
+                return GetFocusedElementFromWindow(windowHandle);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Lỗi khi lấy focused element: " + ex.Message);
                 return "TRYCATCH_NA";
             }
+        }
 
+        private string GetFocusedElementFromWindow(IntPtr windowHandle)
+        {
+            try
+            {
+                IntPtr hwnd = windowHandle;
+                if (hwnd == IntPtr.Zero)
+                {
+                    hwnd = GetForegroundWindow();
+                }
+                if (hwnd == IntPtr.Zero)
+                {
+                    return "{\"name\":\"NO_WINDOW\",\"className\":\"\",\"automationId\":\"\",\"controlType\":\"\",\"isEnabled\":false,\"isVisible\":false}";
+                }
+
+                AutomationElement element = AutomationElement.FromHandle(hwnd);
+                if (element == null)
+                {
+                    return "{\"name\":\"ELEMENT_NULL\",\"className\":\"\",\"automationId\":\"\",\"controlType\":\"\",\"isEnabled\":false,\"isVisible\":false}";
+                }
+
+                AutomationElement focused = element.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.IsOffscreenProperty, false));
+                if (focused == null)
+                {
+                    // Try the element itself as the focused one
+                    focused = element;
+                }
+
+                string name = "";
+                string className = "";
+                string automationId = "";
+                string controlType = "";
+                bool isEnabled = false;
+                bool isVisible = true;
+
+                try { name = focused.Current.Name ?? ""; } catch { }
+                try { className = focused.Current.ClassName ?? ""; } catch { }
+                try { automationId = focused.Current.AutomationId ?? ""; } catch { }
+                try { controlType = focused.Current.ControlType?.ProgrammaticName ?? ""; } catch { }
+                try { isEnabled = focused.Current.IsEnabled; } catch { }
+                try { isVisible = !focused.Current.IsOffscreen; } catch { }
+
+                // Also get the first child element as the focused element inside the window
+                try
+                {
+                    var condition = Condition.TrueCondition;
+                    AutomationElementCollection children = focused.FindAll(TreeScope.Children, condition);
+                    if (children.Count > 0)
+                    {
+                        var first = children[0];
+                        try { name = first.Current.Name ?? ""; } catch { }
+                        try { className = first.Current.ClassName ?? ""; } catch { }
+                        try { automationId = first.Current.AutomationId ?? ""; } catch { }
+                        try { controlType = first.Current.ControlType?.ProgrammaticName ?? ""; } catch { }
+                        try { isEnabled = first.Current.IsEnabled; } catch { }
+                        try { isVisible = !first.Current.IsOffscreen; } catch { }
+                    }
+                }
+                catch { }
+
+                // Return as JSON-like string (matching the expected format from API)
+                return string.Format(
+                    "{{\"name\":\"{0}\",\"className\":\"{1}\",\"automationId\":\"{2}\",\"controlType\":\"{3}\",\"isEnabled\":{4},\"isVisible\":{5}}}",
+                    EscapeJson(name),
+                    EscapeJson(className),
+                    EscapeJson(automationId),
+                    EscapeJson(controlType),
+                    isEnabled.ToString().ToLower(),
+                    isVisible.ToString().ToLower()
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi UI Automation: " + ex.Message);
+                return "{\"name\":\"UA_ERROR:" + EscapeJson(ex.Message) + "\",\"className\":\"\",\"automationId\":\"\",\"controlType\":\"\",\"isEnabled\":false,\"isVisible\":false}";
+            }
+        }
+
+        private static string EscapeJson(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            return s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t");
         }
 
         public void checkIssue(string objectName, string textOutput)
@@ -918,63 +1026,60 @@ namespace TalkBackAutoTest
         public List<UIAppInfo> GetRunningUIApplications()
         {
 
+            //try
+            //{
+            //    using (WebClient client = new WebClient())
+            //    {
+            //        string json = client.DownloadString(BaseUrl + "/api/system/ui-apps");
+            //        var response = JsonConvert.DeserializeObject<ApiResponse>(json);
+
+            //        if (response.success && response.apps != null)
+            //        {
+            //            return response.apps;
+            //        }
+
+            //        return new List<UIAppInfo>();
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Lỗi: " + ex.Message);
+            //    return new List<UIAppInfo>();
+            //}
+
+            var uiApps = new List<UIAppInfo>();
             try
             {
-                using (WebClient client = new WebClient())
+                var processes = Process.GetProcesses();
+                int totalWithWindow = 0;
+                foreach (var process in processes)
                 {
-                    string json = client.DownloadString(BaseUrl + "/api/system/ui-apps");
-                    var response = JsonConvert.DeserializeObject<ApiResponse>(json);
-
-                    if (response.success && response.apps != null)
+                    try
                     {
-                        return response.apps;
+                        if (process.MainWindowHandle != IntPtr.Zero)
+                        {
+                            totalWithWindow++;
+                            uiApps.Add(new UIAppInfo
+                            {
+                                ProcessName = process.ProcessName,
+                                ProcessId = process.Id,
+                                WindowTitle = process.MainWindowTitle,
+                                ExecutablePath = GetProcessPath(process)
+                            });
+                        }
                     }
-
-                    return new List<UIAppInfo>();
+                    catch
+                    {
+                        continue;
+                    }
                 }
+                Console.WriteLine("GetRunningUIApplications: found " + uiApps.Count + " apps (of " + totalWithWindow + " with window handle)");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Lỗi: " + ex.Message);
-                return new List<UIAppInfo>();
+                Console.WriteLine("Lỗi GetRunningUIApplications: " + ex.Message);
             }
-
-            //var uiApps = new List<UIAppInfo>();
-            //// Lấy tất cả các process đang chạy
-            //var processes = Process.GetProcesses();
-
-            //try
-            //{
-            //    // Lọc các process có cửa sổ chính
-            //    foreach (var process in processes.Where(p => p.MainWindowHandle != IntPtr.Zero))
-            //    {
-            //        try
-            //        {
-            //            uiApps.Add(new UIAppInfo
-            //            {
-            //                ProcessName = process.ProcessName,
-            //                ProcessId = process.Id,
-            //                WindowTitle = process.MainWindowTitle,
-            //                ExecutablePath = GetProcessPath(process)
-            //            });
-            //        }
-            //        catch
-            //        {
-            //            // Bỏ qua process không thể truy cập
-            //            continue;
-            //        }
-            //    }
-            //}
-            //finally
-            //{
-            //    // Giải phóng tài nguyên
-            //    foreach (var process in processes)
-            //    {
-            //        process.Dispose();
-            //    }
-            //}
-
-            //return uiApps;
+            return uiApps;
         }
 
         private static string GetProcessPath(Process process)
@@ -993,6 +1098,11 @@ namespace TalkBackAutoTest
 
 
         public Object getFocusedObjectFake(int objIdx, string objElement, string windowTitle, PkgInfo pkgInfo)
+        {
+            return getFocusedObjectFake(objIdx, objElement, windowTitle, pkgInfo, "TalkbackText_NA");
+        }
+
+        public Object getFocusedObjectFake(int objIdx, string objElement, string windowTitle, PkgInfo pkgInfo, string talkbackText)
         {
             //AutomationElement focusedElement = AutomationElement.FocusedElement;
 
@@ -1013,7 +1123,7 @@ namespace TalkBackAutoTest
                 PackageVersion = pkgInfo.pkgVersion;
             }
 
-            
+
 
             string[] values = { "Pass", "Pass", "Pass", "Pass", "Fail", "Consider" };
             Random random = new Random();
@@ -1021,8 +1131,7 @@ namespace TalkBackAutoTest
             string randomResult = values[index];
             string ErrorType = randomResult;
 
-            //return new Object(objIdx, "OBJID_" + objIdx, "currentScreen_" + objIdx, "package_" + objIdx, "packageVersion_" + objIdx, "objectInformation", "talkbackText", randomResult, System.DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"), "allTextDes_optimize", "random_mode", "NA", ErrorType);
-            return new Object(objIdx, "OBJID_" + objIdx, windowTitle, PackageName, PackageVersion, objElement, "talkbackText", randomResult, System.DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"), objName, "random_mode", "NA", ErrorType);
+            return new Object(objIdx, "OBJID_" + objIdx, windowTitle, PackageName, PackageVersion, objElement, talkbackText, randomResult, System.DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"), objName, "random_mode", "NA", ErrorType);
         }
     }
 
