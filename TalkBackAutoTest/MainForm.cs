@@ -2497,7 +2497,7 @@ namespace TalkBackAutoTest
                         Thread.Sleep(1000);
                     }
                     PCManager.changeFocus();
-                    Thread.Sleep(1000);
+                    Thread.Sleep(2000);
 
                     // Capture Narrator output
                     string narratorOutput = PCManager.GetNarratorOutput();

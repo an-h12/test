@@ -487,52 +487,6 @@ namespace TalkBackAutoTest
             return Process.GetProcessesByName("Narrator").Length > 0 || Process.GetProcessesByName("narrator").Length > 0;
         }
 
-        /// <summary>Wait up to `retries` * 200ms for Narrator state to match expected.</summary>
-        public bool WaitForNarratorState(bool expected, int retries = 3)
-        {
-            for (int i = 0; i < retries; i++)
-            {
-                if (IsNarratorRunning() == expected) return true;
-                System.Threading.Thread.Sleep(200);
-            }
-            return IsNarratorRunning() == expected;
-        }
-
-        /// <summary>Start Narrator if not already running (toggle-on approach).</summary>
-        public bool StartNarratorProcess()
-        {
-            if (IsNarratorRunning()) return true;
-            ToggleNarrator(); // Win+Ctrl+Enter
-            System.Threading.Thread.Sleep(200);
-            return WaitForNarratorState(true);
-        }
-
-        /// <summary>Ensure Narrator is on; returns true if already on or successfully turned on.</summary>
-        public bool EnsureNarratorOn()
-        {
-            if (IsNarratorRunning()) return true;
-            Console.WriteLine("INFO: Narrator is off; auto-enabling for capture");
-            ToggleNarrator();
-            if (WaitForNarratorState(true)) return true;
-            // Fallback: direct toggle again
-            ToggleNarrator();
-            return WaitForNarratorState(true);
-        }
-
-        /// <summary>
-        /// Restore Narrator to its prior state. Call with autoEnabled=true
-        /// (from EnsureNarratorOn) to toggle it back off if we auto-enabled it.
-        /// </summary>
-        public void RestoreNarratorState(bool autoEnabled)
-        {
-            if (!autoEnabled) return;
-            ToggleNarrator();
-            if (WaitForNarratorState(false))
-                Console.WriteLine("INFO: Narrator restored to previous state (off)");
-            else
-                Console.WriteLine("WARN: Failed to restore Narrator state");
-        }
-
         // --- Clipboard ---
         /// <summary>Get current clipboard text, or null if unavailable/empty.</summary>
         public string GetClipboardText()
@@ -552,19 +506,6 @@ namespace TalkBackAutoTest
             Clipboard.Clear();
         }
 
-        // FilterOutput
-        private string FilterNarratorOutput(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return text;
-            var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] blocked = new[] {
-                "copied last phrase to clipboard",
-                "failed to copy to clipboard"
-            };
-            var filtered = lines.Where(l => !blocked.Contains(l.Trim().ToLower())).ToArray();
-            return string.Join(Environment.NewLine, filtered);
-        }
-
         /// <summary>
         /// Issue Caps+Ctrl+X to trigger Narrator's "copy last spoken phrase".
         /// Returns raw clipboard text (unfiltered)
@@ -580,6 +521,19 @@ namespace TalkBackAutoTest
             string raw = GetClipboardText();
             if (raw == null) return null;
             return FilterNarratorOutput(raw);
+        }
+
+        // FilterOutput
+        private string FilterNarratorOutput(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] blocked = new[] {
+                "copied last phrase to clipboard",
+                "failed to copy to clipboard"
+            };
+            var filtered = lines.Where(l => !blocked.Contains(l.Trim().ToLower())).ToArray();
+            return string.Join(Environment.NewLine, filtered);
         }
 
         /// <summary>
@@ -624,7 +578,6 @@ namespace TalkBackAutoTest
             return result;
         }
 
-        // --- Public API ---
         /// <summary>
         /// Main public method — captures Narrator output with auto toggle-on.
         /// Auto-disables Narrator if it was off before the call.
@@ -635,7 +588,7 @@ namespace TalkBackAutoTest
             // This method just captures the current Narrator output WITHOUT toggling Narrator on/off.
             if (!IsNarratorRunning())
             {
-                Console.WriteLine("GetNarratorOutput: Narrator chua bat - bo qua capture");
+                Console.WriteLine("Narrator chua bat");
                 return null;
             }
             return CaptureNarratorLastSpoken();

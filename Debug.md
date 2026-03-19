@@ -244,6 +244,21 @@ Narrator state:
 
 ---
 
+## 7. Dọn dead code — 4 hàm không còn sử dụng
+
+**Mô tả:** Sau khi refactor `GetNarratorOutput()` bỏ auto-toggle, 4 hàm sau trở thành dead code:
+
+**Hàm đã xóa:**
+
+| Hàm | Lý do xóa |
+|------|-----------|
+| `StartNarratorProcess()` | Chỉ được gọi bởi `EnsureNarratorOn`, không có caller |
+| `EnsureNarratorOn()` | Không có caller — luồng mới dùng `StartNarratorNVDA` |
+| `RestoreNarratorState(bool)` | Chỉ được gọi bởi `GetNarratorOutput` cũ, không có caller |
+| `WaitForNarratorState(bool, int)` | Chỉ được gọi bởi 3 hàm trên, không có caller |
+
+---
+
 ## Tổng kết các thay đổi
 
 | # | Issue | File | Dòng | Thay đổi |
@@ -261,6 +276,7 @@ Narrator state:
 | 6 | Talkback Text trống | `MainForm.cs` | ~2501 | Capture Narrator output + truyền vào Object + giảm delay xuống 1s |
 | 6 | Talkback Text trống | `MainForm.cs` | ~2504 | Comment `StopRecordVideo()` (xử lý riêng) |
 | 6 | Talkback Text trống | `PCTB.cs` | ~632 | Fix `GetNarratorOutput()` bỏ auto-toggle — Narrator giữ BẬT suốt vòng loop |
+| 7 | Dead code | `PCTB.cs` | ~502-534 | Xóa 4 hàm: `StartNarratorProcess`, `EnsureNarratorOn`, `RestoreNarratorState`, `WaitForNarratorState` |
 
 ---
 
