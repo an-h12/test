@@ -515,9 +515,6 @@ namespace TalkBackAutoTest
             //Caps+Ctrl+X
             SendKeyChord(new byte[] { VK_CAPITAL, VK_CONTROL, VK_X }, 100);
 
-            // Brief delay for clipboard (có thể bỏ)
-            System.Threading.Thread.Sleep(300);
-
             string raw = GetClipboardText();
             if (raw == null) return null;
             return FilterNarratorOutput(raw);
@@ -529,8 +526,8 @@ namespace TalkBackAutoTest
             if (string.IsNullOrEmpty(text)) return text;
             var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             string[] blocked = new[] {
-                "copied last phrase to clipboard",
-                "failed to copy to clipboard"
+                "Copied last phrase to clipboard",
+                "Failed to copy to clipboard"
             };
             var filtered = lines.Where(l => !blocked.Contains(l.Trim().ToLower())).ToArray();
             return string.Join(Environment.NewLine, filtered);
@@ -570,8 +567,7 @@ namespace TalkBackAutoTest
             // Restore original clipboard
             try
             {
-                if (hadText && original != null)
-                    Clipboard.SetText(original);
+                if (hadText && original != null) ClearCurrentClipboard();
             }
             catch { }
 

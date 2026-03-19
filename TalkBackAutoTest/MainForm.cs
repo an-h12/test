@@ -2487,23 +2487,29 @@ namespace TalkBackAutoTest
                         System.IO.Directory.CreateDirectory(@folderResult);
                     }
 
-                    PCManager.StartRecordVideo(videoPath);
+                    //PCManager.StartRecordVideo(videoPath);
                     PCManager.cleanLogPC();
 
-                    // i == 1: first element — force Narrator to read it (Caps+Tab, called once)
+                    
+                    PCManager.changeFocus();
+
+                    //force Narrator to read first element (lọc bỏ đọc tên App ) 
                     if (i == 1)
                     {
-                        PCManager.ForceNarratorRead();
                         Thread.Sleep(1000);
+                        PCManager.ForceNarratorRead();
+                        printLog("Force");
+
                     }
-                    PCManager.changeFocus();
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
 
                     // Capture Narrator output
                     string narratorOutput = PCManager.GetNarratorOutput();
-                    // PCManager.StopRecordVideo();
+                    
+                    //PCManager.StopRecordVideo();
 
-                    Thread.Sleep(1000);
+                    Thread.Sleep(5000);
+
                     string objElement = PCManager.dumpFocusedObject();
                     PCManager.dumpScreen();
                     PCManager.checkIssue("1", "2");
