@@ -297,39 +297,7 @@ namespace TalkBackAutoTest
 
 
 
-        // Keyboard input via keybd_event (avoids SendKeys Win-key limitation)
-        [DllImport("user32.dll")]
-        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll")]
-        private static extern int SetForegroundWindow(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
-
-        private const int SW_RESTORE = 9;
-        private const int SW_SHOW = 5;
-
-        private const byte VK_TAB = 0x09;
-        private const byte VK_RETURN = 0x0D;
-        private const byte VK_CONTROL = 0x11;
-        private const byte VK_LWIN = 0x5B;
-        private const byte VK_CAPITAL = 0x14;  // CapsLock
-        private const byte VK_X = 0x58;
-        private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
-        private const uint KEYEVENTF_KEYUP = 0x0002;
+        
 
 
         //0903
@@ -365,6 +333,34 @@ namespace TalkBackAutoTest
         //end0903
 
         #region Narrator
+
+        // Keyboard input 
+        [DllImport("user32.dll")]
+        private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern int SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr hWnd);
+
+        private const int SW_RESTORE = 9;
+        private const int SW_SHOW = 5;
+
+        private const byte VK_TAB = 0x09;
+        private const byte VK_RETURN = 0x0D;
+        private const byte VK_CONTROL = 0x11;
+        private const byte VK_LWIN = 0x5B;
+        private const byte VK_CAPITAL = 0x14;  // CapsLock
+        private const byte VK_X = 0x58;
+        private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+        private const uint KEYEVENTF_KEYUP = 0x0002;
 
         // --- Keyboard---
         private void SendKeyChord(byte[] vkCodes, int holdMs)
@@ -500,6 +496,7 @@ namespace TalkBackAutoTest
             return null;
         }
 
+        // Chưa xóa history (cần WinRT)        
         /// <summary>Clear the current clipboard contents.</summary>
         public void ClearCurrentClipboard()
         {
@@ -541,7 +538,7 @@ namespace TalkBackAutoTest
             string result = DoNarratorCapture();
             if (result == null)
             {
-                Console.WriteLine("Lỗi: Narrator capture thất bại");
+                Console.WriteLine("Lỗi: Narrator không cap nội dung");
             }
             return result;
         }
@@ -590,15 +587,6 @@ namespace TalkBackAutoTest
             return CaptureNarratorLastSpoken();
         }
 
-        /// <summary>
-        /// Capture Narrator output only if it is already running (no auto toggle).
-        /// Returns null if Narrator is not running.
-        /// </summary>
-        public string TryCaptureNarratorIfRunning()
-        {
-            if (!IsNarratorRunning()) return null;
-            return CaptureNarratorLastSpoken();
-        }
         #endregion narrator
 
         #region nvda
